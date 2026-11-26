@@ -50,7 +50,17 @@ ul.list li button{min-height:36px;padding:4px 12px}
     <button id="tLog">تۆمار</button>
   </div>
 </header>
-<div id="status">مۆدێلەکان باردەکرێن…</div>
+<div id="status">دەستپێکردن… (v12)</div>
+<script>
+window.onerror = function (msg, src, line) {
+  var el = document.getElementById('status');
+  if (el) el.textContent = '❌ هەڵە: ' + msg + ' (هێڵی ' + line + ')';
+};
+window.addEventListener('unhandledrejection', function (e) {
+  var el = document.getElementById('status');
+  if (el) el.textContent = '❌ هەڵە: ' + (e.reason && e.reason.message || e.reason);
+});
+</script>
 
 <main>
   <!-- ===== Kiosk ===== -->
