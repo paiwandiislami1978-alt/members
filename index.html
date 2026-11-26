@@ -26,6 +26,8 @@ main{padding:16px;max-width:1100px;margin:auto}
 #stage video,#stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 #banner{position:absolute;left:0;right:0;bottom:0;padding:18px;text-align:center;font-size:clamp(22px,4vw,40px);font-weight:800;transition:opacity .3s;opacity:0}
 #banner.ok{background:rgba(22,163,74,.9);opacity:1}#banner.bad{background:rgba(220,38,38,.9);opacity:1}
+#tap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(15,23,32,.85);font-size:clamp(22px,4vw,36px);font-weight:800;cursor:pointer;padding:20px}
+#tap small{font-size:16px;font-weight:400;color:var(--muted);margin-top:8px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .muted{color:var(--muted);font-size:14px}
 progress{width:100%;height:14px}
@@ -56,6 +58,7 @@ ul.list li button{min-height:36px;padding:4px 12px}
       <video id="video" autoplay muted playsinline></video>
       <canvas id="overlay"></canvas>
       <div id="banner"></div>
+      <div id="tap" class="hide">👆 یەک جار دەست لێرە بدە<br><small>بۆ چالاککردنی کامێرا و دەنگ — پاشان خۆی بەردەوام کاردەکات</small></div>
     </div>
     <div class="card row" style="margin-top:16px;justify-content:center">
       <button id="startBtn" disabled>▶ دەستپێکردن</button>
@@ -152,6 +155,7 @@ function rebuildMatcher() {
     .filter(([, ds]) => ds.length)
     .map(([n, ds]) => new faceapi.LabeledFaceDescriptors(n, ds.map(d => new Float32Array(d))));
   matcher = labeled.length ? new faceapi.FaceMatcher(labeled, +$('thr').value) : null;
+  if (ready && matcher && !running) autoStart();
 }
 
 // ---------- tabs ----------
@@ -192,12 +196,13 @@ let ready = false;
       faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
       faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
       faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+      faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
       faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
     ]);
     ready = true;
-    rebuildMatcher();
     $('startBtn').disabled = false;
     status(`✓ ئامادەیە — ${Object.keys(members).length} ئەندام تۆمارکراون`);
+    rebuildMatcher();   // ئەگەر ئەندام هەبن، خۆکارانە دەست پێدەکات
   } catch (e) {
     status('❌ مۆدێلەکان بارنەبوون. پەیوەندی ئینتەرنێت بپشکنە و پەڕەکە نوێ بکەرەوە. ' + e.message);
   }
@@ -354,20 +359,50 @@ async function startCam() {
   const mirror = facing === 'user' ? 'scaleX(-1)' : 'none';
   v.style.transform = mirror; $('overlay').style.transform = mirror;
 }
-$('startBtn').onclick = async () => {
-  if (!matcher) { status('⚠ سەرەتا لە بەشی «ئەندامان» وێنەکان زیاد بکە.'); return; }
+// ---------- خۆکار: دەستپێکردن، دەنگ، شاشە بە کراوەیی ----------
+let wakeLock = null, starting = false, manualStop = false;
+async function keepAwake() {
+  try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.onrelease = () => wakeLock = null; } } catch {}
+}
+function soundReady() { return ac && ac.state === 'running'; }
+function showTap(show) { $('tap').classList.toggle('hide', !show); }
+async function autoStart() {
+  if (running || starting || manualStop || !matcher) return;
+  starting = true;
   try {
     ac = ac || new (window.AudioContext || window.webkitAudioContext)();
-    await ac.resume();
+    ac.resume().catch(() => {});
     await startCam();
     running = true; $('startBtn').classList.add('hide'); $('stopBtn').classList.remove('hide');
-    status('🎥 کاردەکات…');
+    status('🎥 خۆکارانە کاردەکات — بە بەردەم کامێرادا تێپەڕن');
+    keepAwake();
     loop();
   } catch (e) {
-    status('❌ کامێرا نەکرایەوە. ڕێگە بە کامێرا بدە و دڵنیابە پەڕەکە بە https کراوەتەوە. ' + e.message);
+    status('⚠ بۆ کردنەوەی کامێرا یەک جار دەست لە شاشە بدە و Allow هەڵبژێرە.');
   }
-};
+  starting = false;
+  setTimeout(() => showTap(!running || !soundReady()), 600);
+}
+// یەکەم دەستلێدان: دەنگ و کامێرا چالاک دەکات (پێویستی وێبگەڕە، تەنها یەک جار)
+document.addEventListener('pointerdown', async () => {
+  if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+  try { await ac.resume(); } catch {}
+  if (!running && !manualStop) await autoStart();
+  showTap(!running || !soundReady());
+}, true);
+// ئەگەر شاشە کوژایەوە یان ئەپ گۆڕدرا و گەڕایەوە، خۆی دووبارە دەست پێدەکاتەوە
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState !== 'visible') return;
+  keepAwake();
+  if (ac) ac.resume().catch(() => {});
+  const live = stream && stream.getVideoTracks().some(t => t.readyState === 'live');
+  if (running && !live) { running = false; await autoStart(); }
+  else if (!running) autoStart();
+});
+
+$('startBtn').onclick = async () => { manualStop = false; await autoStart(); };
 $('stopBtn').onclick = () => {
+  manualStop = true;
   running = false; if (stream) stream.getTracks().forEach(t => t.stop()); stream = null;
   $('stopBtn').classList.add('hide'); $('startBtn').classList.remove('hide');
   const c = $('overlay'); c.getContext('2d').clearRect(0, 0, c.width, c.height);
@@ -375,14 +410,14 @@ $('stopBtn').onclick = () => {
 };
 $('flipBtn').onclick = async () => { facing = facing === 'user' ? 'environment' : 'user'; if (running) try { await startCam(); } catch {} };
 
-const tinyOpts = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 });
+const tinyOpts = new faceapi.TinyFaceDetectorOptions({ inputSize: 288, scoreThreshold: 0.5 });
 async function loop() {
   if (!running) return;
   const v = $('video'), c = $('overlay');
   if (v.readyState >= 2 && v.videoWidth) {
     if (c.width !== v.videoWidth) { c.width = v.videoWidth; c.height = v.videoHeight; }
     try {
-      const dets = await faceapi.detectAllFaces(v, tinyOpts).withFaceLandmarks().withFaceDescriptors();
+      const dets = await faceapi.detectAllFaces(v, tinyOpts).withFaceLandmarks(true).withFaceDescriptors();
       const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height);
       const now = Date.now(), cool = Math.max(5, +$('cool').value || 60) * 1000;
       for (const d of dets) {
@@ -403,7 +438,7 @@ async function loop() {
       }
     } catch (e) { console.log(e); }
   }
-  setTimeout(loop, 120);
+  setTimeout(loop, 20);
 }
 }
 </script>
