@@ -136,17 +136,23 @@ ul.list li button{min-height:36px;padding:4px 12px}
   </section>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/dist/face-api.js"></script>
 <script>
 (async () => {
-const CDNS = ['https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/', 'https://unpkg.com/@vladmandic/face-api@1.7.14/'];
-let MODEL_URL = CDNS[0] + 'model/';
-if (typeof faceapi === 'undefined') {
-  document.getElementById('status').textContent = 'بارکردن لە سێرڤەری دووەم…';
-  await new Promise(res => { const sc = document.createElement('script'); sc.src = CDNS[1] + 'dist/face-api.js'; sc.onload = sc.onerror = res; document.head.appendChild(sc); });
-  MODEL_URL = CDNS[1] + 'model/';
-  if (typeof faceapi === 'undefined') { document.getElementById('status').textContent = '❌ بارنەبوو. پەیوەندی ئینتەرنێت بپشکنە و پەڕەکە نوێ بکەرەوە.'; return; }
+// سەرچاوەکان: سەرەتا هەمان ماڵپەڕی GitHub (خێراترین)، پاشان دوو سێرڤەری یەدەگ
+const CDNS = ['https://paiwandiislami1978-alt.github.io/face-api/', 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/', 'https://unpkg.com/@vladmandic/face-api@1.7.14/'];
+const loadScript = (src, ms) => new Promise(res => {
+  const sc = document.createElement('script'); sc.src = src;
+  const t = setTimeout(res, ms); sc.onload = sc.onerror = () => { clearTimeout(t); res(); };
+  document.head.appendChild(sc);
+});
+let base = null;
+for (let i = 0; i < CDNS.length && typeof faceapi === 'undefined'; i++) {
+  document.getElementById('status').textContent = `بارکردنی بەرنامە… (سێرڤەری ${i + 1})`;
+  await loadScript(CDNS[i] + 'dist/face-api.js', 30000);
+  if (typeof faceapi !== 'undefined') base = CDNS[i];
 }
+if (typeof faceapi === 'undefined') { document.getElementById('status').textContent = '❌ بارنەبوو. پەیوەندی ئینتەرنێت بپشکنە و پەڕەکە نوێ بکەرەوە.'; return; }
+let MODEL_URL = (base || CDNS[0]) + 'model/';
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const status = t => $('status').textContent = t;
@@ -201,8 +207,12 @@ let ready = false;
 async function loadNet(net, label) {
   if (net.isLoaded) return;
   status(`مۆدێلەکان باردەکرێن… ${label}`);
-  try { await net.loadFromUri(MODEL_URL); }
-  catch { MODEL_URL = MODEL_URL.includes('jsdelivr') ? CDNS[1] + 'model/' : CDNS[0] + 'model/'; await net.loadFromUri(MODEL_URL); }
+  let err;
+  const order = [MODEL_URL, ...CDNS.map(c => c + 'model/').filter(u => u !== MODEL_URL)];
+  for (const u of order) {
+    try { await net.loadFromUri(u); MODEL_URL = u; return; } catch (e) { err = e; }
+  }
+  throw err;
 }
 // مۆدێلی گەورەی تۆمارکردن تەنها کاتی زیادکردنی ئەندام بار دەکرێت
 async function ensureFull() {
