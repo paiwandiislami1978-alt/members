@@ -24,7 +24,7 @@ main{padding:16px;max-width:1100px;margin:auto}
 .hide{display:none!important}
 #stage{position:relative;width:100%;max-width:900px;margin:auto;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3}
 #stage video,#stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
-#banner{position:absolute;left:0;right:0;bottom:0;padding:18px;text-align:center;font-size:clamp(22px,4vw,40px);font-weight:800;transition:opacity .3s;opacity:0}
+#banner{position:absolute;left:0;right:0;bottom:0;padding:18px;text-align:center;font-size:clamp(22px,4vw,40px);font-weight:800;transition:opacity .3s;opacity:0;white-space:pre-line}
 #banner.ok{background:rgba(22,163,74,.9);opacity:1}#banner.bad{background:rgba(220,38,38,.9);opacity:1}
 #tap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(15,23,32,.85);font-size:clamp(22px,4vw,36px);font-weight:800;cursor:pointer;padding:20px}
 #tap small{font-size:16px;font-weight:400;color:var(--muted);margin-top:8px}
@@ -147,6 +147,8 @@ const status = t => $('status').textContent = t;
 const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { status('⚠ پاشەکەوت سەرنەکەوت: ' + e.message); } };
 let members = load('members_v1', {});      // { name: [[128 numbers], ...] }
+let groups = load('groups_v1', {});        // { name: مەڵبەند/ئۆرگان }
+const grp = k => groups[k] || '';
 let logRows = load('log_v1', []);          // [{n, t}]
 let matcher = null;
 
@@ -285,19 +287,19 @@ function renderMembers() {
   const q = $('search').value.trim().toLowerCase();
   const names = Object.keys(members).sort((a, b) => a.localeCompare(b));
   $('mCount').textContent = names.length;
-  $('mList').innerHTML = names.filter(n => n.toLowerCase().includes(q)).map(n =>
-    `<li><span>${esc(n)} <span class="muted">(${members[n].length} وێنە)</span></span><button class="ghost" data-del="${esc(n)}">سڕینەوە</button></li>`
+  $('mList').innerHTML = names.filter(n => (n + ' ' + grp(n)).toLowerCase().includes(q)).map(n =>
+    `<li><span>${esc(n)} <span class="muted">— ${esc(grp(n))}</span></span><button class="ghost" data-del="${esc(n)}">سڕینەوە</button></li>`
   ).join('') || '<li class="muted">هیچ ئەندامێک نییە.</li>';
 }
 $('search').oninput = renderMembers;
 $('mList').onclick = e => {
   const n = e.target.dataset.del; if (n == null) return;
-  if (e.target.dataset.sure) { delete members[n]; save('members_v1', members); rebuildMatcher(); renderMembers(); }
+  if (e.target.dataset.sure) { delete members[n]; delete groups[n]; save('groups_v1', groups); save('members_v1', members); rebuildMatcher(); renderMembers(); }
   else { e.target.dataset.sure = 1; e.target.textContent = 'دڵنیایت؟'; e.target.classList.add('red'); }
 };
 $('clrM').onclick = e => {
   if (!e.target.dataset.sure) { e.target.dataset.sure = 1; e.target.textContent = 'دووبارە دابگرە بۆ دڵنیایی'; return; }
-  members = {}; save('members_v1', members); rebuildMatcher(); renderMembers();
+  members = {}; groups = {}; save('groups_v1', groups); save('members_v1', members); rebuildMatcher(); renderMembers();
   delete e.target.dataset.sure; e.target.textContent = 'سڕینەوەی هەموو';
 };
 
@@ -308,15 +310,59 @@ function download(name, text, type) {
   a.download = name; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
-$('expM').onclick = () => download('members.json', JSON.stringify(members), 'application/json');
+$('expM').onclick = () => download('members.json', JSON.stringify({ type: 'members-desc-v2', members, groups }), 'application/json');
+function dataUrlToCanvas(url, max = 800) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c);
+    };
+    img.onerror = () => rej(new Error('وێنە نەخوێندرایەوە'));
+    img.src = url;
+  });
+}
+async function importPhotos(list) {
+  if (!ready) { status('چاوەڕێ بکە تا مۆدێلەکان باردەبن، پاشان دووبارە هەوڵ بدەرەوە.'); return; }
+  $('tMembers').click();
+  $('prog').classList.remove('hide'); $('fails').innerHTML = '';
+  $('pbar').max = list.length;
+  const fails = []; let added = 0;
+  for (let i = 0; i < list.length; i++) {
+    const { name, group, photo } = list[i];
+    $('pbar').value = i; $('ptext').textContent = `${i + 1} / ${list.length} — ${name}`;
+    try {
+      const c = await dataUrlToCanvas(photo);
+      const det = await faceapi.detectSingleFace(c, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.3 }))
+        .withFaceLandmarks().withFaceDescriptor();
+      if (!det) { fails.push(`${name} (${group}) — دەموچاو نەدۆزرایەوە`); continue; }
+      let key = String(name);
+      if (members[key] && groups[key] && groups[key] !== group) key = `${name} — ${group}`;
+      members[key] = [Array.from(det.descriptor, v => +v.toFixed(5))];
+      groups[key] = String(group || '');
+      added++;
+    } catch (err) { fails.push(`${name} — ${err.message}`); }
+    if (i % 5 === 0) await new Promise(r => setTimeout(r, 0));
+  }
+  $('pbar').value = list.length;
+  save('members_v1', members); save('groups_v1', groups); rebuildMatcher(); renderMembers();
+  $('ptext').textContent = `✓ تەواو: ${added} ئەندام زیادکران، ${fails.length} سەرنەکەوتن.`;
+  $('fails').innerHTML = fails.map(x => `<li>⚠ ${esc(x)}</li>`).join('');
+  status(`✓ ئامادەیە — ${Object.keys(members).length} ئەندام تۆمارکراون`);
+}
 $('impM').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   try {
     const data = JSON.parse(await f.text());
+    if (data && data.type === 'members-photos-v1' && Array.isArray(data.members)) { await importPhotos(data.members); return; }
+    const src = data && data.type === 'members-desc-v2' ? data.members : data;
+    const gs = data && data.type === 'members-desc-v2' ? (data.groups || {}) : {};
     let n = 0;
-    for (const [k, v] of Object.entries(data))
-      if (Array.isArray(v) && v.every(d => Array.isArray(d) && d.length === 128)) { members[k] = v; n++; }
-    save('members_v1', members); rebuildMatcher(); renderMembers();
+    for (const [k, v] of Object.entries(src))
+      if (Array.isArray(v) && v.every(d => Array.isArray(d) && d.length === 128)) { members[k] = v; if (gs[k]) groups[k] = String(gs[k]); n++; }
+    save('members_v1', members); save('groups_v1', groups); rebuildMatcher(); renderMembers();
     status(`✓ ${n} ئەندام هێنرانەوە`);
   } catch { status('❌ فایلەکە دروست نییە'); }
 };
@@ -326,11 +372,12 @@ const today = () => new Date().toLocaleDateString('en-CA');
 function renderLog() {
   const d = today(), rows = logRows.filter(r => r.t.startsWith(d)).reverse();
   $('lCount').textContent = new Set(rows.map(r => r.n)).size;
-  $('log').innerHTML = rows.map(r => `<li><span>${esc(r.n)}</span><span>${esc(r.t.slice(11, 19))}</span></li>`).join('')
+  $('log').innerHTML = rows.map(r => `<li><span>${esc(r.n)} <span class="muted">— ${esc(r.g || '')}</span></span><span>${esc(r.t.slice(11, 19))}</span></li>`).join('')
     || '<li class="muted">هێشتا کەس نەهاتووە.</li>';
 }
 $('expL').onclick = () => {
-  const csv = '﻿Name,Date,Time\n' + logRows.map(r => `"${r.n.replace(/"/g, '""')}",${r.t.slice(0, 10)},${r.t.slice(11, 19)}`).join('\n');
+  const q = x => `"${String(x || '').replace(/"/g, '""')}"`;
+  const csv = '﻿Name,Group,Date,Time\n' + logRows.map(r => `${q(r.n)},${q(r.g)},${r.t.slice(0, 10)},${r.t.slice(11, 19)}`).join('\n');
   download(`attendance-${today()}.csv`, csv, 'text/csv;charset=utf-8');
 };
 $('clrL').onclick = e => {
@@ -429,8 +476,8 @@ async function loop() {
         if (known) {
           if (now - (lastSeen[m.label] || 0) > cool) {
             lastSeen[m.label] = now;
-            okSound(); banner('✅ بەخێربێیت ' + m.label, 'ok');
-            logRows.push({ n: m.label, t: localStamp() }); save('log_v1', logRows);
+            okSound(); banner('✅ بەخێربێیت ' + m.label + (grp(m.label) ? '\n' + grp(m.label) : ''), 'ok');
+            logRows.push({ n: m.label, g: grp(m.label), t: localStamp() }); save('log_v1', logRows);
           }
         } else if (now - lastUnknown > 4000 && d.detection.score > 0.7) {
           lastUnknown = now; badSound(); banner('❌ نەناسراو', 'bad');
