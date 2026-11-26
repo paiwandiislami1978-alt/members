@@ -23,6 +23,7 @@ main{padding:16px;max-width:1100px;margin:auto}
 .card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:16px}
 .hide{display:none!important}
 #stage{position:relative;width:100%;max-width:900px;margin:auto;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3}
+#stage video::-webkit-media-controls{display:none!important}
 #stage video,#stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 #banner{position:absolute;left:0;right:0;bottom:0;padding:18px;text-align:center;font-size:clamp(22px,4vw,40px);font-weight:800;transition:opacity .3s;opacity:0;white-space:pre-line}
 #banner.ok{background:rgba(22,163,74,.9);opacity:1}#banner.bad{background:rgba(220,38,38,.9);opacity:1}
@@ -204,7 +205,8 @@ let ready = false;
     ready = true;
     $('startBtn').disabled = false;
     status(`✓ ئامادەیە — ${Object.keys(members).length} ئەندام تۆمارکراون`);
-    rebuildMatcher();   // ئەگەر ئەندام هەبن، خۆکارانە دەست پێدەکات
+    rebuildMatcher();
+    autoStart();        // کامێرا خۆکارانە دەکرێتەوە
   } catch (e) {
     status('❌ مۆدێلەکان بارنەبوون. پەیوەندی ئینتەرنێت بپشکنە و پەڕەکە نوێ بکەرەوە. ' + e.message);
   }
@@ -414,7 +416,7 @@ async function keepAwake() {
 function soundReady() { return ac && ac.state === 'running'; }
 function showTap(show) { $('tap').classList.toggle('hide', !show); }
 async function autoStart() {
-  if (running || starting || manualStop || !matcher) return;
+  if (running || starting || manualStop || !ready) return;
   starting = true;
   try {
     ac = ac || new (window.AudioContext || window.webkitAudioContext)();
@@ -467,7 +469,8 @@ async function loop() {
       const dets = await faceapi.detectAllFaces(v, tinyOpts).withFaceLandmarks(true).withFaceDescriptors();
       const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height);
       const now = Date.now(), cool = Math.max(5, +$('cool').value || 60) * 1000;
-      for (const d of dets) {
+      if (!matcher) { if (dets.length && Date.now() - lastUnknown > 4000) { lastUnknown = Date.now(); banner('⚠ هێشتا هیچ ئەندامێک تۆمار نەکراوە', 'bad'); } }
+      for (const d of (matcher ? dets : [])) {
         const m = matcher.findBestMatch(d.descriptor);
         const known = m.label !== 'unknown';
         const b = d.detection.box;
