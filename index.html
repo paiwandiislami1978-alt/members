@@ -252,6 +252,7 @@ async function refreshBundle() {
   if (!pw) return false;
   try {
     const b = await decryptBundle(pw, await fetchBundleFile());
+    if (b.api && !(bundle && bundle.api)) { att = {}; pending = {}; save('att_v13', att); save('pending_v13', pending); }  // یەکەم جاری لیستی هاوبەش: تاقیکردنەوە کۆنەکانی ئەم ئامێرە دەسڕێنەوە
     bundle = b; save('bundle_v13', b); return true;
   } catch (e) { return !!bundle; }   // ئینتەرنێت نییە: کۆپیی پاشەکەوتکراو بەکاردێت
 }
