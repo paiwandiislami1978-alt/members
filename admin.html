@@ -159,12 +159,13 @@ $('pwBtn').onclick = async () => {
   try { await start($('pw').value.trim()); } catch (e) { $('pwMsg').textContent = e.name === 'OperationError' ? '❌ وشەی نهێنی هەڵەیە' : '❌ ' + e.message; }
 };
 $('pw').onkeydown = e => { if (e.key === 'Enter') $('pwBtn').click(); };
+const fixT = s => { s = String(s || ''); if (/^\d{4}-\d\d-\d\d \d\d:\d\d/.test(s)) return s; const d = new Date(s); if (isNaN(d)) return s; const p = x => String(x).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; };
 async function pull() {
   if (!S.api) { att = load('att_v13', {}); err = 'لیستی هاوبەش هێشتا ڕێکنەخراوە — تەنها ئەم ئامێرە'; render(); return; }
   try {
     const j = await (await fetch(S.api + '?t=' + encodeURIComponent(S.token) + '&_=' + Date.now())).json();
     if (!j.rows) throw new Error(j.error || '');
-    const a = {}; for (const r of j.rows) if (r.n) a[r.n] = { t: r.t, d: r.d };
+    const a = {}; for (const r of j.rows) if (r.n) a[r.n] = { t: fixT(r.t), d: r.d };
     att = a; last = new Date(); err = '';
   } catch (e) { err = 'پەیوەندی نییە: ' + (e.message || ''); }
   render();

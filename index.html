@@ -324,6 +324,7 @@ function unmark(k) {
   post({ action: 'unmark', n: k }).catch(() => {});
   renderAll();
 }
+const fixT = s => { s = String(s || ''); if (/^\d{4}-\d\d-\d\d \d\d:\d\d/.test(s)) return s; const d = new Date(s); if (isNaN(d)) return s; const p = x => String(x).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; };
 async function pull() {
   const a = api();
   if (!a) { $('sync').textContent = '⚠ تەنها لەم ئامێرە (هاوبەشکردن ڕێکنەخراوە)'; return; }
@@ -332,7 +333,7 @@ async function pull() {
     const j = await r.json();
     if (!j.rows) throw new Error(j.error || 'وەڵام نییە');
     const remote = {};
-    for (const row of j.rows) if (row.n) remote[row.n] = { t: row.t, d: row.d };
+    for (const row of j.rows) if (row.n) remote[row.n] = { t: fixT(row.t), d: row.d };
     // پێداچوونەوەی ئەوانەی هێشتا نەگەیشتوون
     for (const [k, act] of Object.entries(pending)) {
       if (act === 'mark' && remote[k]) delete pending[k];
