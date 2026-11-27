@@ -102,6 +102,11 @@ window.addEventListener('unhandledrejection', function (e) { var el = document.g
       <button id="flipBtn" class="ghost">🔄 گۆڕینی کامێرا</button>
     </div>
     <div class="card">
+      <h3 style="margin:0 0 8px;font-size:17px">🔎 ئەگەر کامێرا کەسێکی نەناسییەوە، بە ناو بیدۆزەرەوە</h3>
+      <input id="qName" type="search" placeholder="ناوی ئەندام بنووسە…" autocomplete="off" style="width:100%">
+      <ul id="qList" class="list" style="margin-top:6px"></ul>
+    </div>
+    <div class="card">
       <div class="row" id="miniStats"></div>
       <div id="sync" class="muted"></div>
     </div>
@@ -360,6 +365,23 @@ function counts(filterGroup) {
   return { total, inn, out: total - inn };
 }
 function renderAll() { renderMini(); if (!$('vAtt').classList.contains('hide')) renderAtt(); }
+// ---------- گەڕان بە ناو و تۆمارکردن وەک ناسینەوەی کامێرا ----------
+const norm = s => String(s).toLowerCase().replace(/[ىيی]/g, 'ی').replace(/[كک]/g, 'ک').replace(/ه‌|ە/g, 'ە').replace(/[\u200c\s]+/g, ' ').trim();
+function renderQ() {
+  const q = norm($('qName').value);
+  if (q.length < 2) { $('qList').innerHTML = ''; return; }
+  const hits = Object.entries(people).filter(([k, p]) => norm(k + ' ' + p.g).includes(q)).slice(0, 8);
+  $('qList').innerHTML = hits.map(([k, p]) => `<li><span>${esc(k)} <span class="muted">— ${esc(p.g)}</span></span>` +
+    (att[k] ? `<span class="muted">✔ ئامادەیە ${esc((att[k].t || '').slice(11, 16))}</span>` : `<button class="okb" data-ok="${esc(k)}">✓ ئۆکەی</button>`) + '</li>').join('')
+    || '<li class="muted">کەس نەدۆزرایەوە</li>';
+}
+$('qName').oninput = renderQ;
+$('qList').onclick = e => {
+  const b = e.target.closest('button[data-ok]'); if (!b) return;
+  const k = b.dataset.ok, g = (people[k] || {}).g || '';
+  if (mark(k, true)) { okSound(); banner('✅ بەخێربێیت ' + k + (g ? '\n' + g : ''), 'ok'); lastSeen[k] = Date.now(); }
+  $('qName').value = ''; renderQ();
+};
 function renderMini() {
   const c = counts('');
   $('miniStats').innerHTML = `<span>👥 کۆ: <b>${c.total}</b></span><span style="color:#4ade80">✅ ئامادە: <b>${c.inn}</b></span><span style="color:#fbbf24">⏳ ماوە: <b>${c.out}</b></span>`;
