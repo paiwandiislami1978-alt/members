@@ -67,6 +67,7 @@ tr.g{cursor:pointer}tr.g:hover{background:#1d2b39}
   <button onclick="location.href='./'">📷 کامێرا</button>
   <span id="sync" class="muted"></span>
   <button id="csv">⬇ Excel</button>
+  <button id="reset" style="background:#7a1f1f;color:#fff">🗑 سڕینەوەی هەموو ئامادەبووان</button>
   <button id="fs">⛶ پڕ بە شاشە</button>
 </header>
 <main>
@@ -192,6 +193,14 @@ function render() {
   } else $('hero').classList.add('hide');
 }
 $('groups').onclick = e => { const tr = e.target.closest('tr.g'); if (!tr) return; open[tr.dataset.g] = !open[tr.dataset.g]; render(); };
+$('reset').onclick = async () => {
+  if (!confirm('دڵنیایت؟ هەموو ئامادەبووان لە هەموو ئامێرەکان دەسڕێنەوە و لیستەکە لە سفرەوە دەست پێدەکات.')) return;
+  if (!confirm('دووبارە: بە ڕاستی هەمووی بسڕمەوە؟')) return;
+  localStorage.setItem('att_v13', '{}'); localStorage.setItem('pending_v13', '{}');
+  if (S.api) { try { await fetch(S.api, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ t: S.token, action: 'reset' }) }); } catch (e) { alert('❌ پەیوەندی نییە، دووبارە هەوڵ بدەرەوە'); return; } }
+  att = {}; render(); setTimeout(pull, 1500);
+  alert('✅ سڕایەوە. لیستەکە ئێستا بەتاڵە.');
+};
 $('fs').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); };
 $('csv').onclick = () => {
   const q = x => `"${String(x || '').replace(/"/g, '""')}"`;
