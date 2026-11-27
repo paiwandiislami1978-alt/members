@@ -4,63 +4,85 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>ناسینەوەی ئەندامان</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b1118">
+<title>ئامادەبوونی کۆنگرە</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0f1720;--card:#18232f;--ink:#eef3f7;--muted:#9fb0c0;--ok:#16a34a;--bad:#dc2626;--acc:#38bdf8}
+:root{--bg:#0f1720;--card:#18232f;--ink:#eef3f7;--muted:#9fb0c0;--ok:#16a34a;--bad:#dc2626;--acc:#38bdf8;--line:#243444}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans Arabic",system-ui,sans-serif}
-header{display:flex;gap:8px;padding:12px 16px;align-items:center;flex-wrap:wrap;background:#0b1118}
-header h1{font-size:20px;margin:0;flex:1}
+header{display:flex;gap:8px;padding:10px 14px;align-items:center;flex-wrap:wrap;background:#0b1118;position:sticky;top:0;z-index:5}
+header h1{font-size:19px;margin:0;flex:1;white-space:nowrap}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
 .tabs button{background:transparent;color:var(--muted);border:1px solid #2a3a4a}
 .tabs button.on{background:var(--acc);color:#04131d;border-color:var(--acc)}
-button,.btn{font:inherit;font-weight:600;min-height:44px;padding:8px 16px;border-radius:10px;border:0;background:var(--acc);color:#04131d;cursor:pointer}
+button,.btn{font:inherit;font-weight:600;min-height:44px;padding:8px 14px;border-radius:10px;border:0;background:var(--acc);color:#04131d;cursor:pointer}
 button.ghost{background:#26394b;color:var(--ink)}
 button.red{background:var(--bad);color:#fff}
+button.okb{background:var(--ok);color:#fff}
 button:disabled{opacity:.5}
-main{padding:16px;max-width:1100px;margin:auto}
-.card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:16px}
+main{padding:14px;max-width:1100px;margin:auto}
+.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:14px}
 .hide{display:none!important}
+#status{padding:8px 16px;font-size:14px;color:var(--muted)}
 #stage{position:relative;width:100%;max-width:900px;margin:auto;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3}
 #stage video::-webkit-media-controls{display:none!important}
 #stage video,#stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
-#banner{position:absolute;left:0;right:0;bottom:0;padding:18px;text-align:center;font-size:clamp(22px,4vw,40px);font-weight:800;transition:opacity .3s;opacity:0;white-space:pre-line}
-#banner.ok{background:rgba(22,163,74,.9);opacity:1}#banner.bad{background:rgba(220,38,38,.9);opacity:1}
-#tap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(15,23,32,.85);font-size:clamp(22px,4vw,36px);font-weight:800;cursor:pointer;padding:20px}
-#tap small{font-size:16px;font-weight:400;color:var(--muted);margin-top:8px}
+#banner{position:absolute;left:0;right:0;bottom:0;padding:16px;text-align:center;font-size:clamp(22px,4vw,38px);font-weight:800;transition:opacity .3s;opacity:0;white-space:pre-line}
+#banner.ok{background:rgba(22,163,74,.92);opacity:1}#banner.bad{background:rgba(220,38,38,.92);opacity:1}#banner.info{background:rgba(37,99,235,.92);opacity:1}
+#tap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(15,23,32,.85);font-size:clamp(22px,4vw,34px);font-weight:800;cursor:pointer;padding:20px}
+#tap small{font-size:15px;font-weight:400;color:var(--muted);margin-top:8px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .muted{color:var(--muted);font-size:14px}
 progress{width:100%;height:14px}
-input[type=search],input[type=number]{font:inherit;font-size:16px;padding:8px 12px;border-radius:10px;border:1px solid #2a3a4a;background:#0b1118;color:var(--ink);min-height:44px}
-input[type=range]{width:200px}
-ul.list{list-style:none;padding:0;margin:0;max-height:420px;overflow:auto}
-ul.list li{display:flex;justify-content:space-between;align-items:center;padding:8px 4px;border-bottom:1px solid #243444;gap:8px}
-ul.list li button{min-height:36px;padding:4px 12px}
-#log li span:last-child{direction:ltr;color:var(--muted)}
-#status{padding:10px 16px;font-size:14px;color:var(--muted)}
+input,select{font:inherit;font-size:16px;padding:8px 12px;border-radius:10px;border:1px solid #2a3a4a;background:#0b1118;color:var(--ink);min-height:44px}
+input[type=range]{width:200px;padding:0}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.stat{background:#0b1118;border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:clamp(26px,6vw,40px);line-height:1.1}
+.stat.ok b{color:#4ade80}.stat.bad b{color:#fbbf24}
+.bar{height:10px;background:#0b1118;border-radius:6px;overflow:hidden;margin:6px 0 12px}.bar i{display:block;height:100%;background:var(--ok)}
+.seg{display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid #2a3a4a;margin:10px 0}
+.seg button{flex:1;border-radius:0;background:transparent;color:var(--muted)}
+.seg button.on{background:#26394b;color:var(--ink)}
+.grp{margin-top:12px}
+.grp h3{font-size:16px;margin:0;padding:8px 10px;background:#0b1118;border-radius:10px;display:flex;justify-content:space-between;gap:8px;position:sticky;top:64px}
+ul.list{list-style:none;padding:0;margin:0}
+ul.list li{display:flex;justify-content:space-between;align-items:center;padding:7px 6px;border-bottom:1px solid var(--line);gap:8px}
+ul.list li button{min-height:34px;padding:2px 12px;font-size:14px}
+.time{direction:ltr;color:var(--muted);font-size:13px;white-space:nowrap}
+#lock{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+#lock .card{max-width:420px;width:100%;text-align:center}
+#lock input{width:100%;margin:12px 0;direction:ltr;text-align:center}
+#sync{font-size:13px}
 </style>
 </head>
 <body>
 <header>
-  <h1>ناسینەوەی ئەندامان</h1>
-  <div class="tabs row">
+  <h1>ئامادەبوونی کۆنگرە</h1>
+  <div class="tabs">
     <button id="tKiosk" class="on">کامێرا</button>
+    <button id="tAtt">ئامادەبوون</button>
     <button id="tMembers">ئەندامان</button>
-    <button id="tLog">تۆمار</button>
   </div>
 </header>
-<div id="status">دەستپێکردن… (v12)</div>
+<div id="status">دەستپێکردن… (v13)</div>
 <script>
-window.onerror = function (msg, src, line) {
-  var el = document.getElementById('status');
-  if (el) el.textContent = '❌ هەڵە: ' + msg + ' (هێڵی ' + line + ')';
-};
-window.addEventListener('unhandledrejection', function (e) {
-  var el = document.getElementById('status');
-  if (el) el.textContent = '❌ هەڵە: ' + (e.reason && e.reason.message || e.reason);
-});
+window.onerror = function (msg, src, line) { var el = document.getElementById('status'); if (el) el.textContent = '❌ هەڵە: ' + msg + ' (هێڵی ' + line + ')'; };
+window.addEventListener('unhandledrejection', function (e) { var el = document.getElementById('status'); if (el) el.textContent = '❌ هەڵە: ' + (e.reason && e.reason.message || e.reason); });
 </script>
+
+<div id="lock" class="hide">
+  <div class="card">
+    <h2 style="margin-top:0">🔒 وشەی نهێنی</h2>
+    <p class="muted">بۆ یەکەمجار لەسەر ئەم ئامێرە، وشەی نهێنی ئەپەکە بنووسە. دوای ئەوە ناپرسێتەوە.</p>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="وشەی نهێنی">
+    <button id="pwBtn" style="width:100%">کردنەوە</button>
+    <div id="pwMsg" class="muted" style="margin-top:10px"></div>
+  </div>
+</div>
 
 <main>
   <!-- ===== Kiosk ===== -->
@@ -71,10 +93,14 @@ window.addEventListener('unhandledrejection', function (e) {
       <div id="banner"></div>
       <div id="tap" class="hide">👆 یەک جار دەست لێرە بدە<br><small>بۆ چالاککردنی کامێرا و دەنگ — پاشان خۆی بەردەوام کاردەکات</small></div>
     </div>
-    <div class="card row" style="margin-top:16px;justify-content:center">
-      <button id="startBtn" disabled>▶ دەستپێکردن</button>
+    <div class="card row" style="margin-top:14px;justify-content:center">
+      <button id="startBtn">▶ دەستپێکردن</button>
       <button id="stopBtn" class="ghost hide">⏹ وەستان</button>
       <button id="flipBtn" class="ghost">🔄 گۆڕینی کامێرا</button>
+    </div>
+    <div class="card">
+      <div class="row" id="miniStats"></div>
+      <div id="sync" class="muted"></div>
     </div>
     <div class="card">
       <div class="row">
@@ -82,114 +108,152 @@ window.addEventListener('unhandledrejection', function (e) {
         <input id="thr" type="range" min="0.35" max="0.65" step="0.01" value="0.5">
         <span class="muted">کەمتر = توندتر (هەڵەی کەمتر)، زیاتر = ئاسانتر</span>
       </div>
-      <div class="row" style="margin-top:8px">
-        <label>چەند چرکە تا هەمان کەس دووبارە تۆمار بکرێتەوە:</label>
-        <input id="cool" type="number" min="5" max="3600" value="60" style="width:100px">
-      </div>
     </div>
   </section>
 
-  <!-- ===== Members ===== -->
+  <!-- ===== Attendance ===== -->
+  <section id="vAtt" class="hide">
+    <div class="card">
+      <div class="stats">
+        <div class="stat"><span class="muted">کۆی گشتی</span><b id="sTotal">0</b></div>
+        <div class="stat ok"><span class="muted">ئامادەبوو</span><b id="sIn">0</b></div>
+        <div class="stat bad"><span class="muted">ماوە</span><b id="sOut">0</b></div>
+      </div>
+      <div class="bar"><i id="sBar" style="width:0%"></i></div>
+      <div class="row">
+        <select id="fGroup" style="flex:1;min-width:200px"><option value="">هەموو مەڵبەند و ئۆرگانەکان</option></select>
+        <input id="fSearch" type="search" placeholder="گەڕان بە ناو…" style="flex:1;min-width:160px">
+      </div>
+      <div class="seg">
+        <button id="segOut" class="on">ماوەکان (<span id="cOut">0</span>)</button>
+        <button id="segIn">ئامادەبووان (<span id="cIn">0</span>)</button>
+      </div>
+      <div id="lists"></div>
+    </div>
+    <div class="card row">
+      <button id="csvAll" class="ghost">⬇ Excel — هەموو (بە دۆخەوە)</button>
+      <button id="syncNow" class="ghost">🔄 نوێکردنەوە</button>
+    </div>
+  </section>
+
+  <!-- ===== Members (admin) ===== -->
   <section id="vMembers" class="hide">
     <div class="card">
-      <h2 style="margin-top:0">زیادکردنی ئەندامان</h2>
-      <p class="muted">هەموو وێنەکان پێکەوە هەڵبژێرە. ناوی فایلەکە دەبێتە ناوی ئەندامەکە (بۆ نموونە <b>ahmad.jpg</b>). بۆ زیاتر لە وێنەیەک بۆ یەک کەس: <b>ahmad_1.jpg</b>، <b>ahmad_2.jpg</b>.</p>
-      <label class="btn" for="files">📷 هەڵبژاردنی وێنەکان</label>
-      <input id="files" type="file" accept="image/*" multiple class="hide">
-      <div id="prog" class="hide" style="margin-top:12px">
-        <progress id="pbar" value="0" max="1"></progress>
-        <div id="ptext" class="muted"></div>
-      </div>
-      <ul id="fails" class="list muted"></ul>
+      <h2 style="margin:0 0 6px">ئەندامان: <span id="mCount">0</span></h2>
+      <p class="muted" style="margin:0">ئەندامانی کۆنگرە لەگەڵ وشەی نهێنی خۆکارانە دێن. ئەمانەی خوارەوە تەنها بۆ زیادکردنی ئەندامی نوێ لەسەر ئەم ئامێرەیە.</p>
+      <input id="mSearch" type="search" placeholder="گەڕان…" style="width:100%;margin-top:10px">
+      <ul id="mList" class="list" style="max-height:360px;overflow:auto;margin-top:8px"></ul>
     </div>
     <div class="card">
-      <h3 style="margin-top:0">زیادکردنی یەک ئەندام بە ناو</h3>
-      <p class="muted">ئەگەر ناوی وێنەکانت وەک <b>IMG_1234</b>ە، لێرە ناوەکە بنووسە و وێنەکەی هەڵبژێرە (لە گەلەری یان ڕاستەوخۆ بە کامێرا).</p>
+      <h3 style="margin-top:0">زیادکردنی یەک ئەندام (تەنها لەم ئامێرە)</h3>
       <div class="row">
-        <input id="oneName" type="search" placeholder="ناوی ئەندام" style="flex:1;min-width:180px">
+        <input id="oneName" type="text" placeholder="ناوی ئەندام" style="flex:2;min-width:180px">
+        <input id="oneGroup" type="text" placeholder="مەڵبەند / ئۆرگان" style="flex:2;min-width:160px" list="groupList">
+        <datalist id="groupList"></datalist>
         <label class="btn" for="oneFile">📷 وێنە</label>
         <input id="oneFile" type="file" accept="image/*" class="hide">
       </div>
       <div id="oneMsg" class="muted" style="margin-top:8px"></div>
     </div>
     <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <h2 style="margin:0">ئەندامە تۆمارکراوەکان: <span id="mCount">0</span></h2>
-        <input id="search" type="search" placeholder="گەڕان…">
-      </div>
-      <ul id="mList" class="list" style="margin-top:10px"></ul>
-    </div>
-    <div class="card">
-      <h3 style="margin-top:0">گواستنەوە بۆ ئامێرێکی تر (موبایل ⇄ ئایپاد)</h3>
-      <p class="muted">لێرە پاشەکەوتی بکە، پاشان لە ئامێرەکەی تر بیهێنەرەوە. بەم شێوەیە پێویست ناکات دووبارە ٣٠٠ وێنە بخوێنرێتەوە.</p>
+      <h3 style="margin-top:0">بەڕێوەبردن</h3>
       <div class="row">
-        <button id="expM" class="ghost">⬇ پاشەکەوتکردنی ئەندامان</button>
-        <label class="btn" for="impM" style="background:#26394b;color:var(--ink)">⬆ هێنانەوەی ئەندامان</label>
-        <input id="impM" type="file" accept=".json,application/json" class="hide">
-        <button id="clrM" class="red">سڕینەوەی هەموو</button>
+        <label class="btn" for="impM" style="background:#26394b;color:var(--ink)">⬆ هێنانەوەی فایلی وێنەکان</label>
+        <input id="impM" type="file" class="hide">
+        <button id="logout" class="ghost">🔒 داخستن و سڕینەوەی وشەی نهێنی</button>
       </div>
-    </div>
-  </section>
-
-  <!-- ===== Log ===== -->
-  <section id="vLog" class="hide">
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <h2 style="margin:0">ئامادەبووانی ئەمڕۆ: <span id="lCount">0</span></h2>
-        <div class="row">
-          <button id="expL">⬇ Excel (CSV)</button>
-          <button id="clrL" class="red">سڕینەوەی تۆمار</button>
-        </div>
-      </div>
-      <ul id="log" class="list" style="margin-top:10px"></ul>
+      <div id="prog" class="hide" style="margin-top:12px"><progress id="pbar" value="0" max="1"></progress><div id="ptext" class="muted"></div></div>
+      <ul id="fails" class="list muted"></ul>
     </div>
   </section>
 </main>
 
 <script>
 (async () => {
-// سەرچاوەکان: سەرەتا هەمان ماڵپەڕی GitHub (خێراترین)، پاشان دوو سێرڤەری یەدەگ
-const CDNS = ['https://paiwandiislami1978-alt.github.io/face-api/', 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/', 'https://unpkg.com/@vladmandic/face-api@1.7.14/'];
-const loadScript = (src, ms) => new Promise(res => {
-  const sc = document.createElement('script'); sc.src = src;
-  const t = setTimeout(res, ms); sc.onload = sc.onerror = () => { clearTimeout(t); res(); };
-  document.head.appendChild(sc);
-});
-let base = null;
-for (let i = 0; i < CDNS.length && typeof faceapi === 'undefined'; i++) {
-  document.getElementById('status').textContent = `بارکردنی بەرنامە… (سێرڤەری ${i + 1})`;
-  await loadScript(CDNS[i] + 'dist/face-api.js', 30000);
-  if (typeof faceapi !== 'undefined') base = CDNS[i];
-}
-if (typeof faceapi === 'undefined') { document.getElementById('status').textContent = '❌ بارنەبوو. پەیوەندی ئینتەرنێت بپشکنە و پەڕەکە نوێ بکەرەوە.'; return; }
-let MODEL_URL = (base || CDNS[0]) + 'model/';
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const status = t => $('status').textContent = t;
-
-// ---------- storage ----------
-const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch { return d; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { status('⚠ پاشەکەوت سەرنەکەوت: ' + e.message); } };
-let members = load('members_v1', {});      // { name: [[128 numbers], ...] }
-let groups = load('groups_v1', {});        // { name: مەڵبەند/ئۆرگان }
-const grp = k => groups[k] || '';
-let logRows = load('log_v1', []);          // [{n, t}]
-let matcher = null;
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch {}
 
+// ---------- state ----------
+let bundle = load('bundle_v13', null);           // { api, token, members:[{k,n,g,d,s}] }
+let localMembers = load('local_members_v13', {}); // { k: {n,g,desc:[...]} }
+let att = load('att_v13', {});                    // { k: {t,d} }
+let pending = load('pending_v13', {});            // { k: 'mark'|'unmark' }
+let deviceId = load('device_v13', null);
+if (!deviceId) { deviceId = 'ئامێر-' + Math.random().toString(36).slice(2, 6); save('device_v13', deviceId); }
+let people = {};   // k -> {n,g,has}
+let matcher = null, ready = false;
+
+function rebuildPeople() {
+  people = {};
+  for (const m of (bundle ? bundle.members : [])) people[m.k] = { n: m.n, g: m.g, has: !!m.d };
+  for (const [k, m] of Object.entries(localMembers)) people[k] = { n: m.n, g: m.g, has: true, local: true };
+  const groups = [...new Set(Object.values(people).map(p => p.g))].sort((a, b) => a.localeCompare(b));
+  const sel = $('fGroup'), cur = sel.value;
+  sel.innerHTML = '<option value="">هەموو مەڵبەند و ئۆرگانەکان</option>' + groups.map(g => `<option>${esc(g)}</option>`).join('');
+  sel.value = groups.includes(cur) ? cur : '';
+  $('groupList').innerHTML = groups.map(g => `<option value="${esc(g)}">`).join('');
+}
+function decodeDesc(b64, s) {
+  const bin = atob(b64), out = new Float32Array(bin.length);
+  for (let i = 0; i < bin.length; i++) { let v = bin.charCodeAt(i); if (v > 127) v -= 256; out[i] = v * s / 127; }
+  return out;
+}
 function rebuildMatcher() {
-  const labeled = Object.entries(members)
-    .filter(([, ds]) => ds.length)
-    .map(([n, ds]) => new faceapi.LabeledFaceDescriptors(n, ds.map(d => new Float32Array(d))));
+  if (!ready) return;
+  const labeled = [];
+  for (const m of (bundle ? bundle.members : [])) if (m.d) labeled.push(new faceapi.LabeledFaceDescriptors(m.k, [decodeDesc(m.d, m.s)]));
+  for (const [k, m] of Object.entries(localMembers)) labeled.push(new faceapi.LabeledFaceDescriptors(k, m.desc.map(d => new Float32Array(d))));
   matcher = labeled.length ? new faceapi.FaceMatcher(labeled, +$('thr').value) : null;
-  if (ready && matcher && !running) autoStart();
 }
 
+// ---------- unlock (password) ----------
+const enc = new TextEncoder();
+const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function decryptBundle(pw, file) {
+  const base = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64d(file.salt), iterations: file.iter || 150000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(file.iv) }, key, b64d(file.ct));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+async function fetchBundleFile() {
+  const r = await fetch('members.enc?x=' + Date.now(), { cache: 'no-store' });
+  if (!r.ok) throw new Error('فایلی ئەندامان نەدۆزرایەوە (' + r.status + ')');
+  return r.json();
+}
+async function refreshBundle() {
+  const pw = load('pw_v13', null);
+  if (!pw) return false;
+  try {
+    const b = await decryptBundle(pw, await fetchBundleFile());
+    bundle = b; save('bundle_v13', b); return true;
+  } catch (e) { return !!bundle; }   // ئینتەرنێت نییە: کۆپیی پاشەکەوتکراو بەکاردێت
+}
+$('pwBtn').onclick = async () => {
+  const pw = $('pw').value.trim(); if (!pw) return;
+  $('pwMsg').textContent = 'دەکرێتەوە…';
+  try {
+    const b = await decryptBundle(pw, await fetchBundleFile());
+    bundle = b; save('bundle_v13', b); save('pw_v13', pw);
+    $('lock').classList.add('hide');
+    afterUnlock();
+  } catch (e) { $('pwMsg').textContent = e.name === 'OperationError' ? '❌ وشەی نهێنی هەڵەیە' : '❌ ' + e.message; }
+};
+$('pw').onkeydown = e => { if (e.key === 'Enter') $('pwBtn').click(); };
+$('logout').onclick = e => {
+  if (!e.target.dataset.sure) { e.target.dataset.sure = 1; e.target.textContent = 'دووبارە دابگرە بۆ دڵنیایی'; return; }
+  localStorage.removeItem('pw_v13'); localStorage.removeItem('bundle_v13'); location.reload();
+};
+
 // ---------- tabs ----------
-const views = { tKiosk: 'vKiosk', tMembers: 'vMembers', tLog: 'vLog' };
+const views = { tKiosk: 'vKiosk', tAtt: 'vAtt', tMembers: 'vMembers' };
 for (const t in views) $(t).onclick = () => {
   for (const u in views) { $(u).classList.toggle('on', u === t); $(views[u]).classList.toggle('hide', u !== t); }
+  if (t === 'tAtt') renderAtt();
   if (t === 'tMembers') renderMembers();
-  if (t === 'tLog') renderLog();
 };
 
 // ---------- sound ----------
@@ -201,259 +265,277 @@ function tone(notes) {
     if (f) {
       const o = ac.createOscillator(), g = ac.createGain();
       o.type = 'sine'; o.frequency.value = f;
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.5, t + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.5, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
       o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d);
     }
     t += d;
   }
 }
 const okSound = () => tone([[880, .14], [0, .03], [1320, .25]]);
+const againSound = () => tone([[988, .12]]);
 const badSound = () => tone([[300, .25], [0, .05], [220, .35]]);
 
-// ---------- models ----------
-let ready = false;
-async function loadNet(net, label) {
-  if (net.isLoaded) return;
-  status(`مۆدێلەکان باردەکرێن… ${label}`);
-  let err;
-  const order = [MODEL_URL, ...CDNS.map(c => c + 'model/').filter(u => u !== MODEL_URL)];
-  for (const u of order) {
-    try { await net.loadFromUri(u); MODEL_URL = u; return; } catch (e) { err = e; }
-  }
-  throw err;
+// ---------- attendance + sync ----------
+const pad = x => String(x).padStart(2, '0');
+const stamp = () => { const d = new Date(); return `${d.toLocaleDateString('en-CA')} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; };
+let lastPull = null, syncErr = '';
+function api() { return bundle && bundle.api && bundle.token ? bundle : null; }
+function post(body) {
+  const a = api(); if (!a) return Promise.resolve();
+  return fetch(a.api, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ t: a.token }, body)) });
 }
-// مۆدێلی گەورەی تۆمارکردن تەنها کاتی زیادکردنی ئەندام بار دەکرێت
-async function ensureFull() {
-  await loadNet(faceapi.nets.ssdMobilenetv1, '(بۆ تۆمارکردنی ئەندامان)');
-  await loadNet(faceapi.nets.faceLandmark68Net, '(بۆ تۆمارکردنی ئەندامان)');
+function mark(k, manual) {
+  if (att[k]) return false;
+  att[k] = { t: stamp(), d: deviceId + (manual ? ' (دەستی)' : '') };
+  save('att_v13', att);
+  pending[k] = 'mark'; save('pending_v13', pending);
+  const p = people[k] || { g: '' };
+  post({ action: 'mark', n: k, g: p.g, d: att[k].d }).catch(() => {});
+  renderAll();
+  return true;
 }
-(async () => {
+function unmark(k) {
+  delete att[k]; save('att_v13', att);
+  pending[k] = 'unmark'; save('pending_v13', pending);
+  post({ action: 'unmark', n: k }).catch(() => {});
+  renderAll();
+}
+async function pull() {
+  const a = api();
+  if (!a) { $('sync').textContent = '⚠ تەنها لەم ئامێرە (هاوبەشکردن ڕێکنەخراوە)'; return; }
   try {
-    await faceapi.tf.setBackend('webgl').catch(() => {});
-    await faceapi.tf.ready();
-    await loadNet(faceapi.nets.tinyFaceDetector, '١/٣');
-    await loadNet(faceapi.nets.faceLandmark68TinyNet, '٢/٣');
-    await loadNet(faceapi.nets.faceRecognitionNet, '٣/٣ (گەورەترینیان، کەمێک چاوەڕێ بکە)');
-    ready = true;
-    $('startBtn').disabled = false;
-    status(`✓ ئامادەیە — ${Object.keys(members).length} ئەندام تۆمارکراون`);
-    rebuildMatcher();
-    autoStart();        // کامێرا خۆکارانە دەکرێتەوە
-  } catch (e) {
-    status('❌ مۆدێلەکان بارنەبوون. پەیوەندی ئینتەرنێت بپشکنە و پەڕەکە نوێ بکەرەوە. ' + e.message);
+    const r = await fetch(a.api + '?t=' + encodeURIComponent(a.token) + '&_=' + Date.now());
+    const j = await r.json();
+    if (!j.rows) throw new Error(j.error || 'وەڵام نییە');
+    const remote = {};
+    for (const row of j.rows) if (row.n) remote[row.n] = { t: row.t, d: row.d };
+    // پێداچوونەوەی ئەوانەی هێشتا نەگەیشتوون
+    for (const [k, act] of Object.entries(pending)) {
+      if (act === 'mark' && remote[k]) delete pending[k];
+      else if (act === 'unmark' && !remote[k]) delete pending[k];
+      else if (act === 'mark') { const p = people[k] || { g: '' }; post({ action: 'mark', n: k, g: p.g, d: (att[k] || {}).d || deviceId }).catch(() => {}); }
+      else post({ action: 'unmark', n: k }).catch(() => {});
+    }
+    const next = Object.assign({}, remote);
+    for (const [k, act] of Object.entries(pending)) { if (act === 'mark' && att[k]) next[k] = att[k]; if (act === 'unmark') delete next[k]; }
+    att = next; save('att_v13', att); save('pending_v13', pending);
+    lastPull = new Date(); syncErr = '';
+  } catch (e) { syncErr = e.message || 'هەڵە'; }
+  renderSync(); renderAll();
+}
+function renderSync() {
+  const n = Object.keys(pending).length;
+  $('sync').textContent = !api() ? '⚠ تەنها لەم ئامێرە' :
+    syncErr ? `⚠ پەیوەندی بە لیستی هاوبەش نییە (${syncErr}) — ${n} چاوەڕێی ناردن` :
+    lastPull ? `🔄 هاوبەشە لەگەڵ ئامێرەکانی تر — دوایین نوێکردنەوە ${pad(lastPull.getHours())}:${pad(lastPull.getMinutes())}:${pad(lastPull.getSeconds())}${n ? ' — ' + n + ' چاوەڕێی ناردن' : ''}` : '🔄 پەیوەندی…';
+}
+setInterval(() => { if (document.visibilityState === 'visible') pull(); }, 4000);
+$('syncNow').onclick = pull;
+
+// ---------- attendance view ----------
+let seg = 'out';
+$('segOut').onclick = () => { seg = 'out'; $('segOut').classList.add('on'); $('segIn').classList.remove('on'); renderAtt(); };
+$('segIn').onclick = () => { seg = 'in'; $('segIn').classList.add('on'); $('segOut').classList.remove('on'); renderAtt(); };
+$('fGroup').onchange = renderAtt; $('fSearch').oninput = renderAtt;
+function counts(filterGroup) {
+  let total = 0, inn = 0;
+  for (const [k, p] of Object.entries(people)) { if (filterGroup && p.g !== filterGroup) continue; total++; if (att[k]) inn++; }
+  return { total, inn, out: total - inn };
+}
+function renderAll() { renderMini(); if (!$('vAtt').classList.contains('hide')) renderAtt(); }
+function renderMini() {
+  const c = counts('');
+  $('miniStats').innerHTML = `<span>👥 کۆ: <b>${c.total}</b></span><span style="color:#4ade80">✅ ئامادە: <b>${c.inn}</b></span><span style="color:#fbbf24">⏳ ماوە: <b>${c.out}</b></span>`;
+}
+function renderAtt() {
+  const g = $('fGroup').value, q = $('fSearch').value.trim().toLowerCase();
+  const c = counts(g);
+  $('sTotal').textContent = c.total; $('sIn').textContent = c.inn; $('sOut').textContent = c.out;
+  $('cIn').textContent = c.inn; $('cOut').textContent = c.out;
+  $('sBar').style.width = (c.total ? Math.round(c.inn * 100 / c.total) : 0) + '%';
+  const byG = {};
+  for (const [k, p] of Object.entries(people)) {
+    if (g && p.g !== g) continue;
+    const isIn = !!att[k];
+    (byG[p.g] = byG[p.g] || { all: 0, inn: 0, rows: [] }).all++;
+    if (isIn) byG[p.g].inn++;
+    if ((seg === 'in') !== isIn) continue;
+    if (q && !(k + ' ' + p.n).toLowerCase().includes(q)) continue;
+    byG[p.g].rows.push(k);
   }
-})();
-
-// ---------- register photos ----------
-function nameOf(file) {
-  let b = file.name.replace(/\.[^.]+$/, '').trim();
-  const m = b.match(/^(.*)[_\- ](\d+)$/);
-  if (m && !/^(img|image|photo|dsc|pxl|screenshot|wa)$/i.test(m[1].trim())) b = m[1];
-  return b.trim();
+  const html = Object.keys(byG).sort((a, b) => a.localeCompare(b)).map(gr => {
+    const x = byG[gr]; if (!x.rows.length) return '';
+    x.rows.sort(seg === 'in' ? (a, b) => (att[b].t || '').localeCompare(att[a].t || '') : (a, b) => a.localeCompare(b));
+    return `<div class="grp"><h3><span>${esc(gr)}</span><span class="muted">${x.inn} / ${x.all} ئامادە</span></h3><ul class="list">` +
+      x.rows.map(k => seg === 'in'
+        ? `<li><span>${esc(k)}</span><span class="row" style="gap:6px"><span class="time">${esc((att[k].t || '').slice(11, 16))}</span><button class="ghost" data-un="${esc(k)}">↩</button></span></li>`
+        : `<li><span>${esc(k)}${people[k].has ? '' : ' <span class="muted">(بێ وێنە)</span>'}</span><button class="okb" data-mk="${esc(k)}">✓ ئامادە</button></li>`
+      ).join('') + '</ul></div>';
+  }).join('');
+  $('lists').innerHTML = html || `<p class="muted" style="text-align:center">${seg === 'in' ? 'هێشتا کەس نەهاتووە.' : 'هەموو ئامادەن 🎉'}</p>`;
 }
-function fileToCanvas(file, max = 800) {
-  return new Promise((res, rej) => {
-    const url = URL.createObjectURL(file), img = new Image();
-    img.onload = () => {
-      const s = Math.min(1, max / Math.max(img.width, img.height));
-      const c = document.createElement('canvas');
-      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(url); res(c);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('وێنە نەخوێندرایەوە')); };
-    img.src = url;
-  });
-}
-$('files').onchange = async e => {
-  const files = [...e.target.files];
-  e.target.value = '';
-  if (!files.length) return;
-  if (!ready) { status('چاوەڕێ بکە تا مۆدێلەکان باردەبن…'); return; }
-  $('prog').classList.remove('hide'); $('fails').innerHTML = '';
-  $('ptext').textContent = 'ئامادەکردن…';
-  try { await ensureFull(); } catch { $('ptext').textContent = '❌ مۆدێلی تۆمارکردن بارنەبوو. ئینتەرنێت بپشکنە.'; return; }
-  $('pbar').max = files.length;
-  const fails = [];
-  const replaced = new Set();
-  let added = 0;
-  for (let i = 0; i < files.length; i++) {
-    const f = files[i], name = nameOf(f);
-    $('pbar').value = i; $('ptext').textContent = `${i + 1} / ${files.length} — ${name}`;
-    try {
-      const c = await fileToCanvas(f);
-      const det = await faceapi.detectSingleFace(c, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 }))
-        .withFaceLandmarks().withFaceDescriptor();
-      if (!det) { fails.push(f.name + ' — دەموچاو نەدۆزرایەوە'); continue; }
-      if (!replaced.has(name)) { members[name] = []; replaced.add(name); }   // وێنەی نوێ جێگەی کۆن دەگرێتەوە
-      members[name].push(Array.from(det.descriptor, v => +v.toFixed(5)));
-      added++;
-    } catch (err) { fails.push(f.name + ' — ' + err.message); }
-    if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
+$('lists').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.mk != null) {
+    if (!b.dataset.sure) { b.dataset.sure = 1; b.textContent = 'دڵنیایت؟'; setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = '✓ ئامادە'; } }, 3000); return; }
+    mark(b.dataset.mk, true);
+  } else if (b.dataset.un != null) {
+    if (!b.dataset.sure) { b.dataset.sure = 1; b.textContent = 'لابردن؟'; b.classList.add('red'); setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = '↩'; b.classList.remove('red'); } }, 3000); return; }
+    unmark(b.dataset.un);
   }
-  $('pbar').value = files.length;
-  save('members_v1', members); rebuildMatcher(); renderMembers();
-  $('ptext').textContent = `✓ تەواو: ${added} وێنە زیادکرا، ${fails.length} سەرنەکەوت.`;
-  const generic = [...replaced].filter(n => /^(img|image|photo|dsc|pxl|screenshot|wa)?[\s_\-]*[\d\-_]*$/i.test(n));
-  if (generic.length) fails.unshift(`ئاگاداربە: ${generic.length} ناو وەک ناوی کامێران (${generic.slice(0, 3).join('، ')}…). ناوی فایلەکان بگۆڕە یان «زیادکردنی یەک ئەندام» بەکاربهێنە.`);
-  $('fails').innerHTML = fails.map(x => `<li>⚠ ${esc(x)}</li>`).join('');
-  status(`✓ ئامادەیە — ${Object.keys(members).length} ئەندام تۆمارکراون`);
 };
-
-$('oneFile').onchange = async e => {
-  const f = e.target.files[0]; e.target.value = '';
-  const name = $('oneName').value.trim();
-  if (!f) return;
-  if (!name) { $('oneMsg').textContent = '⚠ سەرەتا ناوەکە بنووسە.'; return; }
-  if (!ready) { $('oneMsg').textContent = 'چاوەڕێ بکە تا مۆدێلەکان باردەبن…'; return; }
-  $('oneMsg').textContent = 'دەخوێندرێتەوە…';
-  try {
-    await ensureFull();
-    const c = await fileToCanvas(f);
-    const det = await faceapi.detectSingleFace(c, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 }))
-      .withFaceLandmarks().withFaceDescriptor();
-    if (!det) { $('oneMsg').textContent = '⚠ دەموچاو نەدۆزرایەوە، وێنەیەکی ڕوونتر هەڵبژێرە.'; return; }
-    (members[name] = members[name] || []).push(Array.from(det.descriptor, v => +v.toFixed(5)));
-    save('members_v1', members); rebuildMatcher(); renderMembers();
-    $('oneMsg').textContent = `✓ ${name} زیادکرا (${members[name].length} وێنە).`;
-    $('oneName').value = ''; $('oneName').focus();
-  } catch (err) { $('oneMsg').textContent = '❌ ' + err.message; }
-};
-
-function renderMembers() {
-  const q = $('search').value.trim().toLowerCase();
-  const names = Object.keys(members).sort((a, b) => a.localeCompare(b));
-  $('mCount').textContent = names.length;
-  $('mList').innerHTML = names.filter(n => (n + ' ' + grp(n)).toLowerCase().includes(q)).map(n =>
-    `<li><span>${esc(n)} <span class="muted">— ${esc(grp(n))}</span></span><button class="ghost" data-del="${esc(n)}">سڕینەوە</button></li>`
-  ).join('') || '<li class="muted">هیچ ئەندامێک نییە.</li>';
-}
-$('search').oninput = renderMembers;
-$('mList').onclick = e => {
-  const n = e.target.dataset.del; if (n == null) return;
-  if (e.target.dataset.sure) { delete members[n]; delete groups[n]; save('groups_v1', groups); save('members_v1', members); rebuildMatcher(); renderMembers(); }
-  else { e.target.dataset.sure = 1; e.target.textContent = 'دڵنیایت؟'; e.target.classList.add('red'); }
-};
-$('clrM').onclick = e => {
-  if (!e.target.dataset.sure) { e.target.dataset.sure = 1; e.target.textContent = 'دووبارە دابگرە بۆ دڵنیایی'; return; }
-  members = {}; groups = {}; save('groups_v1', groups); save('members_v1', members); rebuildMatcher(); renderMembers();
-  delete e.target.dataset.sure; e.target.textContent = 'سڕینەوەی هەموو';
-};
-
-// ---------- export / import ----------
 function download(name, text, type) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([text], { type }));
   a.download = name; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
-$('expM').onclick = () => download('members.json', JSON.stringify({ type: 'members-desc-v2', members, groups }), 'application/json');
-function dataUrlToCanvas(url, max = 800) {
+$('csvAll').onclick = () => {
+  const q = x => `"${String(x || '').replace(/"/g, '""')}"`;
+  const rows = Object.entries(people).sort((a, b) => (a[1].g + a[0]).localeCompare(b[1].g + b[0]))
+    .map(([k, p]) => [q(k), q(p.g), q(att[k] ? 'ئامادە' : 'نەهاتووە'), q(att[k] ? att[k].t : ''), q(att[k] ? att[k].d : '')].join(','));
+  download(`kongre-${new Date().toLocaleDateString('en-CA')}.csv`, '﻿ناو,مەڵبەند / ئۆرگان,دۆخ,کات,ئامێر\n' + rows.join('\n'), 'text/csv;charset=utf-8');
+};
+
+// ---------- members view ----------
+function renderMembers() {
+  const q = $('mSearch').value.trim().toLowerCase();
+  const ks = Object.keys(people).sort((a, b) => (people[a].g + a).localeCompare(people[b].g + b));
+  $('mCount').textContent = ks.length;
+  $('mList').innerHTML = ks.filter(k => (k + ' ' + people[k].g).toLowerCase().includes(q)).map(k =>
+    `<li><span>${esc(k)} <span class="muted">— ${esc(people[k].g)}${people[k].local ? ' · لەم ئامێرە' : ''}${people[k].has ? '' : ' · بێ وێنە'}</span></span>${people[k].local ? `<button class="ghost" data-del="${esc(k)}">سڕینەوە</button>` : ''}</li>`
+  ).join('') || '<li class="muted">هیچ ئەندامێک نییە.</li>';
+}
+$('mSearch').oninput = renderMembers;
+$('mList').onclick = e => {
+  const k = e.target.dataset.del; if (k == null) return;
+  if (!e.target.dataset.sure) { e.target.dataset.sure = 1; e.target.textContent = 'دڵنیایت؟'; e.target.classList.add('red'); return; }
+  delete localMembers[k]; save('local_members_v13', localMembers); rebuildPeople(); rebuildMatcher(); renderMembers(); renderMini();
+};
+
+// ---------- face library (same GitHub site first, then backups) ----------
+const CDNS = ['https://paiwandiislami1978-alt.github.io/face-api/', 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/', 'https://unpkg.com/@vladmandic/face-api@1.7.14/'];
+const loadScript = (src, ms) => new Promise(res => { const sc = document.createElement('script'); sc.src = src; const t = setTimeout(res, ms); sc.onload = sc.onerror = () => { clearTimeout(t); res(); }; document.head.appendChild(sc); });
+let MODEL_URL = CDNS[0] + 'model/';
+async function loadNet(net, label) {
+  if (net.isLoaded) return;
+  status(`مۆدێلەکان باردەکرێن… ${label}`);
+  let err;
+  for (const u of [MODEL_URL, ...CDNS.map(c => c + 'model/').filter(u => u !== MODEL_URL)]) {
+    try { await net.loadFromUri(u); MODEL_URL = u; return; } catch (e) { err = e; }
+  }
+  throw err;
+}
+async function ensureFull() {
+  await loadNet(faceapi.nets.ssdMobilenetv1, '(بۆ تۆمارکردنی ئەندامان)');
+  await loadNet(faceapi.nets.faceLandmark68Net, '(بۆ تۆمارکردنی ئەندامان)');
+}
+async function loadFace() {
+  for (let i = 0; i < CDNS.length && typeof faceapi === 'undefined'; i++) {
+    status(`بارکردنی بەرنامە… (سێرڤەری ${i + 1})`);
+    await loadScript(CDNS[i] + 'dist/face-api.js', 30000);
+    if (typeof faceapi !== 'undefined') MODEL_URL = CDNS[i] + 'model/';
+  }
+  if (typeof faceapi === 'undefined') throw new Error('بەرنامەی ناسینەوە بارنەبوو. ئینتەرنێت بپشکنە و پەڕەکە نوێ بکەرەوە.');
+  await faceapi.tf.setBackend('webgl').catch(() => {});
+  await faceapi.tf.ready();
+  await loadNet(faceapi.nets.tinyFaceDetector, '١/٣');
+  await loadNet(faceapi.nets.faceLandmark68TinyNet, '٢/٣');
+  await loadNet(faceapi.nets.faceRecognitionNet, '٣/٣ (گەورەترینیان)');
+  ready = true;
+}
+
+// ---------- add members on this device ----------
+function imgToCanvas(src, max = 800) {
   return new Promise((res, rej) => {
     const img = new Image();
-    img.onload = () => {
-      const s = Math.min(1, max / Math.max(img.width, img.height));
-      const c = document.createElement('canvas');
-      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c);
-    };
+    img.onload = () => { const s = Math.min(1, max / Math.max(img.width, img.height)); const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c); };
     img.onerror = () => rej(new Error('وێنە نەخوێندرایەوە'));
-    img.src = url;
+    img.src = src;
   });
 }
-async function importPhotos(list) {
-  if (!ready) { status('چاوەڕێ بکە تا مۆدێلەکان باردەبن، پاشان دووبارە هەوڵ بدەرەوە.'); return; }
-  $('tMembers').click();
-  $('prog').classList.remove('hide'); $('ptext').textContent = 'ئامادەکردن…';
-  try { await ensureFull(); } catch { $('ptext').textContent = '❌ مۆدێلی تۆمارکردن بارنەبوو. ئینتەرنێت بپشکنە.'; return; }
-  $('prog').classList.remove('hide'); $('fails').innerHTML = '';
-  $('pbar').max = list.length;
-  const fails = []; let added = 0;
-  for (let i = 0; i < list.length; i++) {
-    const { name, group, photo } = list[i];
-    $('pbar').value = i; $('ptext').textContent = `${i + 1} / ${list.length} — ${name}`;
-    try {
-      const c = await dataUrlToCanvas(photo);
-      const det = await faceapi.detectSingleFace(c, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.3 }))
-        .withFaceLandmarks().withFaceDescriptor();
-      if (!det) { fails.push(`${name} (${group}) — دەموچاو نەدۆزرایەوە`); continue; }
-      let key = String(name);
-      if (members[key] && groups[key] && groups[key] !== group) key = `${name} — ${group}`;
-      members[key] = [Array.from(det.descriptor, v => +v.toFixed(5))];
-      groups[key] = String(group || '');
-      added++;
-    } catch (err) { fails.push(`${name} — ${err.message}`); }
-    if (i % 5 === 0) await new Promise(r => setTimeout(r, 0));
-  }
-  $('pbar').value = list.length;
-  save('members_v1', members); save('groups_v1', groups); rebuildMatcher(); renderMembers();
-  $('ptext').textContent = `✓ تەواو: ${added} ئەندام زیادکران، ${fails.length} سەرنەکەوتن.`;
-  $('fails').innerHTML = fails.map(x => `<li>⚠ ${esc(x)}</li>`).join('');
-  status(`✓ ئامادەیە — ${Object.keys(members).length} ئەندام تۆمارکراون`);
+async function describe(canvas) {
+  const det = await faceapi.detectSingleFace(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.3 })).withFaceLandmarks().withFaceDescriptor();
+  return det ? det.descriptor : null;
 }
+$('oneFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = '';
+  const name = $('oneName').value.trim(), group = $('oneGroup').value.trim() || 'ئەندامی زیادکراو';
+  if (!f) return;
+  if (!name) { $('oneMsg').textContent = '⚠ سەرەتا ناوەکە بنووسە.'; return; }
+  if (!ready) { $('oneMsg').textContent = 'چاوەڕێ بکە تا مۆدێلەکان باردەبن…'; return; }
+  $('oneMsg').textContent = 'دەخوێندرێتەوە…';
+  const url = URL.createObjectURL(f);
+  try {
+    await ensureFull();
+    const d = await describe(await imgToCanvas(url));
+    if (!d) { $('oneMsg').textContent = '⚠ دەموچاو نەدۆزرایەوە، وێنەیەکی ڕوونتر هەڵبژێرە.'; return; }
+    const k = people[name] && people[name].g !== group ? `${name} — ${group}` : name;
+    localMembers[k] = { n: name, g: group, desc: [Array.from(d, v => +v.toFixed(5))] };
+    save('local_members_v13', localMembers); rebuildPeople(); rebuildMatcher(); renderMembers(); renderMini();
+    $('oneMsg').textContent = `✓ ${k} زیادکرا.`; $('oneName').value = '';
+  } catch (err) { $('oneMsg').textContent = '❌ ' + err.message; }
+  finally { URL.revokeObjectURL(url); }
+};
+// فایلی وێنەکان (members-photos-v1): بۆ بەڕێوەبەر — نیشانەی دەموچاو دروست دەکات
 $('impM').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   try {
     const data = JSON.parse(await f.text());
-    if (data && data.type === 'members-photos-v1' && Array.isArray(data.members)) { await importPhotos(data.members); return; }
-    const src = data && data.type === 'members-desc-v2' ? data.members : data;
-    const gs = data && data.type === 'members-desc-v2' ? (data.groups || {}) : {};
-    let n = 0;
-    for (const [k, v] of Object.entries(src))
-      if (Array.isArray(v) && v.every(d => Array.isArray(d) && d.length === 128)) { members[k] = v; if (gs[k]) groups[k] = String(gs[k]); n++; }
-    save('members_v1', members); save('groups_v1', groups); rebuildMatcher(); renderMembers();
-    status(`✓ ${n} ئەندام هێنرانەوە`);
-  } catch { status('❌ فایلەکە دروست نییە'); }
+    if (!(data && data.type === 'members-photos-v1')) { status('❌ ئەم فایلە فایلی وێنەی ئەندامان نییە'); return; }
+    window.__built = await buildFromPhotos(data.members);
+  } catch (err) { status('❌ ' + err.message); }
 };
-
-// ---------- attendance log ----------
-const today = () => new Date().toLocaleDateString('en-CA');
-function renderLog() {
-  const d = today(), rows = logRows.filter(r => r.t.startsWith(d)).reverse();
-  $('lCount').textContent = new Set(rows.map(r => r.n)).size;
-  $('log').innerHTML = rows.map(r => `<li><span>${esc(r.n)} <span class="muted">— ${esc(r.g || '')}</span></span><span>${esc(r.t.slice(11, 19))}</span></li>`).join('')
-    || '<li class="muted">هێشتا کەس نەهاتووە.</li>';
-}
-$('expL').onclick = () => {
-  const q = x => `"${String(x || '').replace(/"/g, '""')}"`;
-  const csv = '﻿Name,Group,Date,Time\n' + logRows.map(r => `${q(r.n)},${q(r.g)},${r.t.slice(0, 10)},${r.t.slice(11, 19)}`).join('\n');
-  download(`attendance-${today()}.csv`, csv, 'text/csv;charset=utf-8');
-};
-$('clrL').onclick = e => {
-  if (!e.target.dataset.sure) { e.target.dataset.sure = 1; e.target.textContent = 'دووبارە دابگرە بۆ دڵنیایی'; return; }
-  logRows = []; save('log_v1', logRows); renderLog();
-  delete e.target.dataset.sure; e.target.textContent = 'سڕینەوەی تۆمار';
-};
-function localStamp() {
-  const d = new Date(), p = x => String(x).padStart(2, '0');
-  return `${d.toLocaleDateString('en-CA')} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+async function buildFromPhotos(list) {
+  $('prog').classList.remove('hide'); $('fails').innerHTML = ''; $('ptext').textContent = 'ئامادەکردن…';
+  await ensureFull();
+  $('pbar').max = list.length;
+  const out = [], fails = [];
+  for (let i = 0; i < list.length; i++) {
+    const m = list[i];
+    $('pbar').value = i; $('ptext').textContent = `${i + 1} / ${list.length} — ${m.name}`;
+    let d = null;
+    try { if (m.photo) d = await describe(await imgToCanvas(m.photo)); } catch {}
+    if (!d) fails.push(m.name);
+    let q = null, s = 0;
+    if (d) {
+      s = Math.max(...Array.from(d, Math.abs)) || 1;
+      let bin = ''; for (const v of d) bin += String.fromCharCode(Math.round(v / s * 127) & 255);
+      q = btoa(bin);
+    }
+    out.push({ n: m.name, g: m.group, d: q, s: +s.toFixed(6) });
+    if (i % 5 === 0) await new Promise(r => setTimeout(r, 0));
+  }
+  $('pbar').value = list.length;
+  save('built_v13', out);
+  $('ptext').textContent = `✓ تەواو: ${out.length - fails.length} وێنە خوێندرانەوە، ${fails.length} سەرنەکەوتن.`;
+  $('fails').innerHTML = fails.map(x => `<li>⚠ ${esc(x)}</li>`).join('');
+  return out;
 }
 
 // ---------- kiosk ----------
-let stream = null, running = false, facing = 'user';
+let stream = null, running = false, facing = 'user', wakeLock = null, starting = false, manualStop = false;
 const lastSeen = {}; let lastUnknown = 0, bannerTimer = 0;
-function banner(text, cls) {
-  const b = $('banner'); b.textContent = text; b.className = cls;
-  clearTimeout(bannerTimer); bannerTimer = setTimeout(() => b.className = '', 2500);
-}
+function banner(text, cls) { const b = $('banner'); b.textContent = text; b.className = cls; clearTimeout(bannerTimer); bannerTimer = setTimeout(() => b.className = '', 2500); }
 $('thr').oninput = () => { $('thrVal').textContent = (+$('thr').value).toFixed(2); rebuildMatcher(); };
-
+async function keepAwake() { try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.onrelease = () => wakeLock = null; } } catch {} }
+const soundReady = () => ac && ac.state === 'running';
+const showTap = show => $('tap').classList.toggle('hide', !show);
 async function startCam() {
   if (stream) stream.getTracks().forEach(t => t.stop());
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('ئەم وێبگەڕە کامێرا ناکاتەوە. لە Chrome بیکەرەوە.');
   stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
   const v = $('video'); v.srcObject = stream; await v.play();
   const mirror = facing === 'user' ? 'scaleX(-1)' : 'none';
   v.style.transform = mirror; $('overlay').style.transform = mirror;
 }
-// ---------- خۆکار: دەستپێکردن، دەنگ، شاشە بە کراوەیی ----------
-let wakeLock = null, starting = false, manualStop = false;
-async function keepAwake() {
-  try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.onrelease = () => wakeLock = null; } } catch {}
+function camError(e) {
+  const n = e && e.name;
+  if (n === 'NotAllowedError' || n === 'SecurityError') return '⚠ ڕێگە بە کامێرا نەدراوە. لە Chrome: 🔒 ← الأذونات ← الكاميرا ← سماح. هەروەها ڕێکخستنی موبایل ← التطبيقات ← Chrome ← الأذونات ← الكاميرا.';
+  if (n === 'NotReadableError' || n === 'TrackStartError') return '⚠ کامێرا لەلایەن ئەپێکی ترەوە بەکاردێت. ئەپەکانی تر دابخە و دووبارە هەوڵ بدەرەوە.';
+  if (n === 'NotFoundError' || n === 'OverconstrainedError') return '⚠ کامێرا نەدۆزرایەوە. «گۆڕینی کامێرا» تاقی بکەرەوە.';
+  return '⚠ کامێرا نەکرایەوە: ' + (n || '') + ' ' + (e && e.message || '');
 }
-function soundReady() { return ac && ac.state === 'running'; }
-function showTap(show) { $('tap').classList.toggle('hide', !show); }
 async function autoStart() {
   if (running || starting || manualStop || !ready) return;
   starting = true;
@@ -462,64 +544,53 @@ async function autoStart() {
     ac.resume().catch(() => {});
     await startCam();
     running = true; $('startBtn').classList.add('hide'); $('stopBtn').classList.remove('hide');
-    status('🎥 خۆکارانە کاردەکات — بە بەردەم کامێرادا تێپەڕن');
-    keepAwake();
-    loop();
-  } catch (e) {
-    status('⚠ بۆ کردنەوەی کامێرا یەک جار دەست لە شاشە بدە و Allow هەڵبژێرە.');
-  }
+    status(matcher ? '🎥 خۆکارانە کاردەکات — بە بەردەم کامێرادا تێپەڕن' : '🎥 کامێرا کراوەیە، بەڵام هیچ ئەندامێک نییە');
+    keepAwake(); loop();
+  } catch (e) { status(camError(e)); }
   starting = false;
   setTimeout(() => showTap(!running || !soundReady()), 600);
 }
-// یەکەم دەستلێدان: دەنگ و کامێرا چالاک دەکات (پێویستی وێبگەڕە، تەنها یەک جار)
 document.addEventListener('pointerdown', async () => {
   if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
   try { await ac.resume(); } catch {}
   if (!running && !manualStop) await autoStart();
   showTap(!running || !soundReady());
 }, true);
-// ئەگەر شاشە کوژایەوە یان ئەپ گۆڕدرا و گەڕایەوە، خۆی دووبارە دەست پێدەکاتەوە
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState !== 'visible') return;
-  keepAwake();
-  if (ac) ac.resume().catch(() => {});
+  keepAwake(); if (ac) ac.resume().catch(() => {});
+  pull();
   const live = stream && stream.getVideoTracks().some(t => t.readyState === 'live');
-  if (running && !live) { running = false; await autoStart(); }
-  else if (!running) autoStart();
+  if (running && !live) { running = false; await autoStart(); } else if (!running) autoStart();
 });
-
 $('startBtn').onclick = async () => { manualStop = false; await autoStart(); };
 $('stopBtn').onclick = () => {
-  manualStop = true;
-  running = false; if (stream) stream.getTracks().forEach(t => t.stop()); stream = null;
+  manualStop = true; running = false; if (stream) stream.getTracks().forEach(t => t.stop()); stream = null;
   $('stopBtn').classList.add('hide'); $('startBtn').classList.remove('hide');
-  const c = $('overlay'); c.getContext('2d').clearRect(0, 0, c.width, c.height);
-  status('⏹ وەستا');
+  const c = $('overlay'); c.getContext('2d').clearRect(0, 0, c.width, c.height); status('⏹ وەستا');
 };
-$('flipBtn').onclick = async () => { facing = facing === 'user' ? 'environment' : 'user'; if (running) try { await startCam(); } catch {} };
+$('flipBtn').onclick = async () => { facing = facing === 'user' ? 'environment' : 'user'; if (running) try { await startCam(); } catch (e) { status(camError(e)); } };
 
-const tinyOpts = new faceapi.TinyFaceDetectorOptions({ inputSize: 288, scoreThreshold: 0.5 });
 async function loop() {
   if (!running) return;
   const v = $('video'), c = $('overlay');
   if (v.readyState >= 2 && v.videoWidth) {
     if (c.width !== v.videoWidth) { c.width = v.videoWidth; c.height = v.videoHeight; }
     try {
-      const dets = await faceapi.detectAllFaces(v, tinyOpts).withFaceLandmarks(true).withFaceDescriptors();
+      const dets = await faceapi.detectAllFaces(v, new faceapi.TinyFaceDetectorOptions({ inputSize: 288, scoreThreshold: 0.5 })).withFaceLandmarks(true).withFaceDescriptors();
       const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height);
-      const now = Date.now(), cool = Math.max(5, +$('cool').value || 60) * 1000;
-      if (!matcher) { if (dets.length && Date.now() - lastUnknown > 4000) { lastUnknown = Date.now(); banner('⚠ هێشتا هیچ ئەندامێک تۆمار نەکراوە', 'bad'); } }
-      for (const d of (matcher ? dets : [])) {
-        const m = matcher.findBestMatch(d.descriptor);
+      const now = Date.now();
+      for (const d of dets) {
+        const m = matcher ? matcher.findBestMatch(d.descriptor) : { label: 'unknown' };
         const known = m.label !== 'unknown';
         const b = d.detection.box;
-        ctx.lineWidth = 4; ctx.strokeStyle = known ? '#16a34a' : '#dc2626';
-        ctx.strokeRect(b.x, b.y, b.width, b.height);
+        ctx.lineWidth = 4; ctx.strokeStyle = known ? '#16a34a' : '#dc2626'; ctx.strokeRect(b.x, b.y, b.width, b.height);
         if (known) {
-          if (now - (lastSeen[m.label] || 0) > cool) {
+          if (now - (lastSeen[m.label] || 0) > 8000) {
             lastSeen[m.label] = now;
-            okSound(); banner('✅ بەخێربێیت ' + m.label + (grp(m.label) ? '\n' + grp(m.label) : ''), 'ok');
-            logRows.push({ n: m.label, g: grp(m.label), t: localStamp() }); save('log_v1', logRows);
+            const g = (people[m.label] || {}).g || '';
+            if (mark(m.label)) { okSound(); banner('✅ بەخێربێیت ' + m.label + (g ? '\n' + g : ''), 'ok'); }
+            else { againSound(); banner('✔ پێشتر تۆمارکراوە: ' + m.label, 'info'); }
           }
         } else if (now - lastUnknown > 4000 && d.detection.score > 0.7) {
           lastUnknown = now; badSound(); banner('❌ نەناسراو', 'bad');
@@ -529,6 +600,21 @@ async function loop() {
   }
   setTimeout(loop, 20);
 }
+
+// ---------- start ----------
+function afterUnlock() {
+  rebuildPeople(); rebuildMatcher(); renderMini(); renderSync(); pull();
+  if (ready) autoStart();
+}
+const facePromise = loadFace().then(() => { rebuildMatcher(); status(`✓ ئامادەیە — ${Object.keys(people).length} ئەندام`); if (bundle) autoStart(); })
+  .catch(e => status('❌ ' + e.message));
+if (load('pw_v13', null)) {
+  await refreshBundle();
+  if (bundle) afterUnlock(); else $('lock').classList.remove('hide');
+} else {
+  $('lock').classList.remove('hide');
+}
+await facePromise;
 })();
 </script>
 </body>
