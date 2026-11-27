@@ -113,8 +113,8 @@ window.addEventListener('unhandledrejection', function (e) { var el = document.g
     </div>
     <div class="card">
       <div class="row">
-        <label>وردی: <b id="thrVal">0.50</b></label>
-        <input id="thr" type="range" min="0.35" max="0.65" step="0.01" value="0.5">
+        <label>وردی: <b id="thrVal">0.45</b></label>
+        <input id="thr" type="range" min="0.35" max="0.65" step="0.01" value="0.45">
         <span class="muted">کەمتر = توندتر (هەڵەی کەمتر)، زیاتر = ئاسانتر</span>
       </div>
     </div>
@@ -482,7 +482,7 @@ async function loadFace() {
   await faceapi.tf.setBackend('webgl').catch(() => {});
   await faceapi.tf.ready();
   await loadNet(faceapi.nets.tinyFaceDetector, '١/٣');
-  await loadNet(faceapi.nets.faceLandmark68TinyNet, '٢/٣');
+  await loadNet(faceapi.nets.faceLandmark68Net, '٢/٣');
   await loadNet(faceapi.nets.faceRecognitionNet, '٣/٣ (گەورەترینیان)');
   ready = true;
 }
@@ -557,7 +557,7 @@ async function buildFromPhotos(list) {
 
 // ---------- kiosk ----------
 let stream = null, running = false, facing = 'user', wakeLock = null, starting = false, manualStop = false;
-const lastSeen = {}; let lastUnknown = 0, bannerTimer = 0;
+const lastSeen = {}; let lastUnknown = 0, bannerTimer = 0; const streak = { k: '', n: 0, t: 0 };
 function banner(text, cls) { const b = $('banner'); b.textContent = text; b.className = cls; clearTimeout(bannerTimer); bannerTimer = setTimeout(() => b.className = '', 2500); }
 $('thr').oninput = () => { $('thrVal').textContent = (+$('thr').value).toFixed(2); rebuildMatcher(); };
 async function keepAwake() { try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.onrelease = () => wakeLock = null; } } catch {} }
@@ -619,14 +619,26 @@ async function loop() {
   if (v.readyState >= 2 && v.videoWidth) {
     if (c.width !== v.videoWidth) { c.width = v.videoWidth; c.height = v.videoHeight; }
     try {
-      const dets = await faceapi.detectAllFaces(v, new faceapi.TinyFaceDetectorOptions({ inputSize: 288, scoreThreshold: 0.5 })).withFaceLandmarks(true).withFaceDescriptors();
+      const dets = await faceapi.detectAllFaces(v, new faceapi.TinyFaceDetectorOptions({ inputSize: 288, scoreThreshold: 0.5 })).withFaceLandmarks().withFaceDescriptors();
       const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height);
       const now = Date.now();
       for (const d of dets) {
-        const m = matcher ? matcher.findBestMatch(d.descriptor) : { label: 'unknown' };
-        const known = m.label !== 'unknown';
         const b = d.detection.box;
-        ctx.lineWidth = 4; ctx.strokeStyle = known ? '#16a34a' : '#dc2626'; ctx.strokeRect(b.x, b.y, b.width, b.height);
+        // ناسینەوەی توند: باشترین و دووەم باشترین کەس بەراورد دەکرێن
+        let best = 'unknown', bd = 9, sd = 9;
+        if (matcher) for (const L of matcher.labeledDescriptors) {
+          let dd = 9; for (const x of L.descriptors) dd = Math.min(dd, faceapi.euclideanDistance(d.descriptor, x));
+          if (dd < bd) { sd = bd; bd = dd; best = L.label; } else if (dd < sd) sd = dd;
+        }
+        const thr = +$('thr').value, okFace = b.width >= 90 && d.detection.score >= 0.6;
+        const cand = okFace && bd < thr && (sd - bd) > 0.05 ? best : 'unknown';
+        // دەبێت ٣ وێنەی لەدوایەک هەمان کەس بن
+        if (cand !== 'unknown' && streak.k === cand && now - streak.t < 1500) streak.n++; else streak.n = cand === 'unknown' ? 0 : 1;
+        streak.k = cand; streak.t = now;
+        const m = { label: streak.n >= 3 ? cand : 'unknown' };
+        const known = m.label !== 'unknown';
+        ctx.lineWidth = 4; ctx.strokeStyle = known || cand !== 'unknown' ? '#16a34a' : (okFace ? '#dc2626' : '#eab308'); ctx.strokeRect(b.x, b.y, b.width, b.height);
+        if (!okFace) continue;
         if (known) {
           if (now - (lastSeen[m.label] || 0) > 8000) {
             lastSeen[m.label] = now;
@@ -634,7 +646,7 @@ async function loop() {
             if (mark(m.label)) { okSound(); banner('✅ بەخێربێیت ' + m.label + (g ? '\n' + g : ''), 'ok'); }
             else { againSound(); banner('✔ پێشتر تۆمارکراوە: ' + m.label, 'info'); }
           }
-        } else if (now - lastUnknown > 4000 && d.detection.score > 0.7) {
+        } else if (cand === 'unknown' && now - lastUnknown > 4000 && d.detection.score > 0.7) {
           lastUnknown = now; badSound(); banner('❌ نەناسراو', 'bad');
         }
       }
