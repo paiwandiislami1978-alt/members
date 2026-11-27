@@ -68,7 +68,7 @@ ul.list li button{min-height:34px;padding:2px 12px;font-size:14px}
     <button id="tMembers">ئەندامان</button>
   </div>
 </header>
-<div id="status">دەستپێکردن… (v13)</div>
+<div id="status">دەستپێکردن… (v14)</div>
 <script>
 window.onerror = function (msg, src, line) { var el = document.getElementById('status'); if (el) el.textContent = '❌ هەڵە: ' + msg + ' (هێڵی ' + line + ')'; };
 window.addEventListener('unhandledrejection', function (e) { var el = document.getElementById('status'); if (el) el.textContent = '❌ هەڵە: ' + (e.reason && e.reason.message || e.reason); });
@@ -213,11 +213,25 @@ function rebuildMatcher() {
 // ---------- unlock (password) ----------
 const enc = new TextEncoder();
 const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
-async function decryptBundle(pw, file) {
+async function decryptRaw(pw, file) {
   const base = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
   const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64d(file.salt), iterations: file.iter || 150000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
-  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(file.iv) }, key, b64d(file.ct));
+  let plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(file.iv) }, key, b64d(file.ct));
+  if (file.z) plain = await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
   return JSON.parse(new TextDecoder().decode(plain));
+}
+async function decryptBundle(pw, file) {
+  const data = await decryptRaw(pw, file);
+  if (data.v !== 2) return data;
+  const all = b64d(data.D);
+  const sub = i => { let s = ''; for (let j = 0; j < 128; j++) s += String.fromCharCode(all[i * 128 + j]); return btoa(s); };
+  const members = data.m.map(([n, gi, sc, dup], i) => {
+    const g = data.groups[gi];
+    return { k: dup ? `${n} — ${g}` : n, n, g, d: sc ? sub(i) : null, s: sc };
+  });
+  let cfg = {};
+  try { const r = await fetch('config.enc?x=' + Date.now(), { cache: 'no-store' }); if (r.ok) cfg = await decryptRaw(pw, await r.json()); } catch {}
+  return { members, api: cfg.api || null, token: cfg.token || null };
 }
 async function fetchBundleFile() {
   const r = await fetch('members.enc?x=' + Date.now(), { cache: 'no-store' });
