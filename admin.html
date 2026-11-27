@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سەرپەرشتی ئامادەبوون</title>
+<link rel="manifest" href="admin-manifest.json">
+<meta name="theme-color" content="#0b1118">
+<link rel="icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1720;--card:#18232f;--ink:#eef3f7;--muted:#9fb0c0;--ok:#22c55e;--wait:#fbbf24;--acc:#38bdf8;--line:#243444}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans Arabic",system-ui,sans-serif}
+header{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 18px;background:#0b1118}
+header h1{margin:0;font-size:22px;flex:1}
+button{font:inherit;font-weight:600;min-height:42px;padding:6px 14px;border-radius:10px;border:0;background:#26394b;color:var(--ink);cursor:pointer}
+main{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;padding:16px;max-width:1500px;margin:auto}
+@media(max-width:900px){main{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border-radius:16px;padding:16px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.stat{background:#0b1118;border-radius:14px;padding:14px;text-align:center}
+.stat b{display:block;font-size:clamp(34px,6vw,64px);line-height:1.05}
+.stat.ok b{color:var(--ok)}.stat.w b{color:var(--wait)}
+.big{height:16px;background:#0b1118;border-radius:8px;overflow:hidden;margin:14px 0 4px}.big i{display:block;height:100%;background:var(--ok);transition:width .6s}
+table{width:100%;border-collapse:collapse}
+td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.n{text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bar{height:10px;background:#0b1118;border-radius:6px;overflow:hidden;min-width:80px}.bar i{display:block;height:100%;background:var(--ok)}
+tr.g{cursor:pointer}tr.g:hover{background:#1d2b39}
+.rem{font-size:14px;color:var(--muted);padding:4px 10px 12px}
+.feed{list-style:none;margin:0;padding:0;max-height:52vh;overflow:auto}
+.feed li{display:flex;justify-content:space-between;gap:8px;padding:8px 4px;border-bottom:1px solid var(--line)}
+.feed li small{color:var(--muted);display:block}
+.feed li img,.ph0{width:46px;height:46px;border-radius:50%;object-fit:cover;flex:none;background:#26394b}
+.who{display:flex;gap:10px;align-items:center}
+.hero{display:flex;gap:16px;align-items:center;background:#0f2a1a;border:2px solid var(--ok);border-radius:16px;padding:14px;margin-bottom:16px}
+.hero img,.hero .ph0{width:130px;height:130px;border-radius:14px}
+.hero b{font-size:clamp(22px,2.4vw,30px);display:block;line-height:1.3}
+.hero .t{font-size:18px}
+#phBox{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#phBtn{background:#facc15;color:#111}
+.t{direction:ltr;color:var(--muted);white-space:nowrap}
+.qr{background:#fff;border-radius:14px;padding:12px;display:flex;justify-content:center}
+.qr svg{width:100%;max-width:240px;height:auto}
+.muted{color:var(--muted);font-size:14px}
+#lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9}
+#lock .card{max-width:420px;width:100%;text-align:center}
+#lock input{width:100%;font:inherit;font-size:18px;padding:10px;border-radius:10px;border:1px solid #2a3a4a;background:#0b1118;color:var(--ink);direction:ltr;text-align:center;margin:12px 0}
+#lock button{width:100%;background:var(--acc);color:#04131d}
+.hide{display:none!important}
+#sync{font-size:14px}
+</style>
+</head>
+<body>
+<div id="lock">
+  <div class="card">
+    <h2 style="margin-top:0">🔒 سەرپەرشتی ئامادەبوون</h2>
+    <p class="muted">وشەی نهێنی ئەپەکە بنووسە (یەک جار).</p>
+    <input id="pw" type="password" placeholder="وشەی نهێنی">
+    <button id="pwBtn">کردنەوە</button>
+    <div id="pwMsg" class="muted" style="margin-top:10px"></div>
+  </div>
+</div>
+<header>
+  <h1>📋 سەرپەرشتی ئامادەبوونی کۆنگرە</h1>
+  <span id="sync" class="muted"></span>
+  <button id="csv">⬇ Excel</button>
+  <button id="fs">⛶ پڕ بە شاشە</button>
+</header>
+<main>
+  <section>
+    <div class="card">
+      <div class="stats">
+        <div class="stat"><span class="muted">کۆی ئەندامان</span><b id="sT">0</b></div>
+        <div class="stat ok"><span class="muted">ئامادەبوو</span><b id="sI">0</b></div>
+        <div class="stat w"><span class="muted">ماوە</span><b id="sO">0</b></div>
+      </div>
+      <div class="big"><i id="sB" style="width:0%"></i></div>
+      <div class="muted" id="sP"></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2 style="margin:0 0 8px;font-size:18px">بە پێی مەڵبەند و ئۆرگان <span class="muted">(کلیک بکە بۆ بینینی ئەوانەی ماون)</span></h2>
+      <table><tbody id="groups"></tbody></table>
+    </div>
+  </section>
+  <aside>
+    <div id="hero" class="hero hide"></div>
+    <div class="card" style="margin-bottom:16px">
+      <div id="phBox"><label id="phBtn" class="btn" for="phFile" style="font-weight:700;padding:8px 14px;border-radius:10px;cursor:pointer">📷 وێنەی ئەندامان</label><input id="phFile" type="file" style="display:none"><span id="phMsg" class="muted"></span></div>
+    </div>
+    <div class="card">
+      <h2 style="margin:0 0 8px;font-size:18px">🕒 دوایین هاتووەکان</h2>
+      <ul class="feed" id="feed"></ul>
+    </div>
+    <div class="card" style="margin-top:16px;text-align:center">
+      <h2 style="margin:0 0 8px;font-size:18px">📱 دابەزاندنی ئەپەکە لەسەر موبایل</h2>
+      <div class="qr" id="qr"></div>
+      <p class="muted" style="margin:10px 0 0">بە کامێرای موبایل ئەم کۆدە سکان بکە، پاشان لە Chrome: ⋮ ← «إضافة إلى الشاشة الرئيسية» یان «تثبيت التطبيق».</p>
+    </div>
+  </aside>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+(async () => {
+const APP_URL = 'https://paiwandiislami1978-alt.github.io/members/';
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch { return d; } };
+const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+try { const q = qrcode(0, 'M'); q.addData(APP_URL); q.make(); $('qr').innerHTML = q.createSvgTag(8, 2); } catch { $('qr').textContent = APP_URL; }
+
+const enc = new TextEncoder(), b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function decryptRaw(pw, file) {
+  const base = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64d(file.salt), iterations: file.iter || 150000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+  let plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(file.iv) }, key, b64d(file.ct));
+  if (file.z) plain = await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+async function unlock(pw) {
+  const f = await (await fetch('members.enc?x=' + Date.now(), { cache: 'no-store' })).json();
+  const d = await decryptRaw(pw, f);
+  const people = d.m.map(([n, gi, sc, dup]) => { const g = d.groups[gi]; return { k: dup ? `${n} — ${g}` : n, g }; });
+  let cfg = {};
+  try { const r = await fetch('config.enc?x=' + Date.now(), { cache: 'no-store' }); if (r.ok) cfg = await decryptRaw(pw, await r.json()); } catch {}
+  return { people, api: cfg.api, token: cfg.token };
+}
+let S = null, att = {}, open = {}, last = null, err = '';
+// ---------- وێنەکان: یەک جار لە فایلی endamekan-kongre13.json، تەنها لەسەر ئەم ئامێرە هەڵدەگیرێن ----------
+let photos = {};
+const idb = () => new Promise((res, rej) => { const r = indexedDB.open('kongre_photos', 1); r.onupgradeneeded = () => r.result.createObjectStore('p'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+async function idbGet() { const db = await idb(); return new Promise(res => { const q = db.transaction('p').objectStore('p').get('all'); q.onsuccess = () => res(q.result || {}); q.onerror = () => res({}); }); }
+async function idbSet(v) { const db = await idb(); return new Promise(res => { const t = db.transaction('p', 'readwrite'); t.objectStore('p').put(v, 'all'); t.oncomplete = res; t.onerror = res; }); }
+function phMsg() { const n = Object.keys(photos).length; $('phMsg').textContent = n ? `✓ ${n} وێنە ئامادەیە` : 'یەک جار فایلی endamekan-kongre13.json هەڵبژێرە بۆ پیشاندانی وێنەکان'; $('phBtn').style.background = n ? '#26394b' : '#facc15'; $('phBtn').style.color = n ? '#eef3f7' : '#111'; }
+$('phFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  $('phMsg').textContent = 'دەخوێندرێتەوە…';
+  try {
+    const d = JSON.parse(await f.text());
+    if (!d || d.type !== 'members-photos-v1') throw new Error('ئەمە فایلی وێنەی ئەندامان نییە');
+    const cnt = {}; for (const m of d.members) cnt[m.name] = (cnt[m.name] || 0) + 1;
+    const p = {}; for (const m of d.members) p[cnt[m.name] > 1 ? `${m.name} — ${m.group}` : m.name] = m.photo;
+    photos = p; await idbSet(p); phMsg(); render();
+  } catch (err) { $('phMsg').textContent = '❌ ' + err.message; }
+};
+try { photos = await idbGet(); } catch {} phMsg();
+const img = (k, cls) => photos[k] ? `<img src="${photos[k]}" alt="">` : `<span class="ph0"></span>`;
+async function start(pw) {
+  S = await unlock(pw); save('pw_v13', pw);
+  $('lock').classList.add('hide');
+  render(); pull(); setInterval(pull, 3000);
+}
+$('pwBtn').onclick = async () => {
+  $('pwMsg').textContent = 'دەکرێتەوە…';
+  try { await start($('pw').value.trim()); } catch (e) { $('pwMsg').textContent = e.name === 'OperationError' ? '❌ وشەی نهێنی هەڵەیە' : '❌ ' + e.message; }
+};
+$('pw').onkeydown = e => { if (e.key === 'Enter') $('pwBtn').click(); };
+async function pull() {
+  if (!S.api) { att = load('att_v13', {}); err = 'لیستی هاوبەش هێشتا ڕێکنەخراوە — تەنها ئەم ئامێرە'; render(); return; }
+  try {
+    const j = await (await fetch(S.api + '?t=' + encodeURIComponent(S.token) + '&_=' + Date.now())).json();
+    if (!j.rows) throw new Error(j.error || '');
+    const a = {}; for (const r of j.rows) if (r.n) a[r.n] = { t: r.t, d: r.d };
+    att = a; last = new Date(); err = '';
+  } catch (e) { err = 'پەیوەندی نییە: ' + (e.message || ''); }
+  render();
+}
+const pad = x => String(x).padStart(2, '0');
+function render() {
+  if (!S) return;
+  const total = S.people.length, inn = S.people.filter(p => att[p.k]).length;
+  $('sT').textContent = total; $('sI').textContent = inn; $('sO').textContent = total - inn;
+  const pct = total ? Math.round(inn * 100 / total) : 0;
+  $('sB').style.width = pct + '%'; $('sP').textContent = `${pct}% ئامادە بوون`;
+  $('sync').textContent = err ? '⚠ ' + err : last ? `🔄 زیندوو — ${pad(last.getHours())}:${pad(last.getMinutes())}:${pad(last.getSeconds())}` : '';
+  const G = {};
+  for (const p of S.people) { (G[p.g] = G[p.g] || { all: 0, inn: 0, rem: [] }).all++; if (att[p.k]) G[p.g].inn++; else G[p.g].rem.push(p.k); }
+  $('groups').innerHTML = Object.keys(G).sort((a, b) => a.localeCompare(b)).map(g => {
+    const x = G[g], w = Math.round(x.inn * 100 / x.all);
+    return `<tr class="g" data-g="${esc(g)}"><td>${open[g] ? '▾' : '▸'} ${esc(g)}</td><td style="width:30%"><div class="bar"><i style="width:${w}%"></i></div></td><td class="n">${x.inn} / ${x.all}</td></tr>` +
+      (open[g] ? `<tr><td colspan="3" class="rem">${x.rem.length ? '⏳ ماون: ' + x.rem.map(esc).join('، ') : '✅ هەموو ئامادەن'}</td></tr>` : '');
+  }).join('');
+  const byK = Object.fromEntries(S.people.map(p => [p.k, p.g]));
+  const recent = Object.entries(att).sort((a, b) => (b[1].t || '').localeCompare(a[1].t || '')).slice(0, 30);
+  $('feed').innerHTML = recent.map(([k, v]) => `<li><span class="who">${img(k)}<span>${esc(k)}<small>${esc(byK[k] || '')}</small></span></span><span class="t">${esc((v.t || '').slice(11, 16))}</span></li>`).join('') || '<li class="muted">هێشتا کەس نەهاتووە.</li>';
+  if (recent.length) {
+    const [k, v] = recent[0];
+    $('hero').classList.remove('hide');
+    $('hero').innerHTML = `${img(k)}<div><span class="muted">✅ دوایین هاتوو</span><b>${esc(k)}</b><span class="muted">${esc(byK[k] || '')}</span><div class="t">${esc((v.t || '').slice(11, 19))}</div></div>`;
+  } else $('hero').classList.add('hide');
+}
+$('groups').onclick = e => { const tr = e.target.closest('tr.g'); if (!tr) return; open[tr.dataset.g] = !open[tr.dataset.g]; render(); };
+$('fs').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); };
+$('csv').onclick = () => {
+  const q = x => `"${String(x || '').replace(/"/g, '""')}"`;
+  const rows = S.people.slice().sort((a, b) => (a.g + a.k).localeCompare(b.g + b.k)).map(p => [q(p.k), q(p.g), q(att[p.k] ? 'ئامادە' : 'نەهاتووە'), q(att[p.k] ? att[p.k].t : '')].join(','));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿ناو,مەڵبەند / ئۆرگان,دۆخ,کات\n' + rows.join('\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = `amadebun-${new Date().toLocaleDateString('en-CA')}.csv`; document.body.appendChild(a); a.click();
+};
+const saved = load('pw_v13', null);
+if (saved) { try { await start(saved); } catch {} }
+})();
+</script>
+</body>
+</html>
