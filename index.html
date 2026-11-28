@@ -619,6 +619,7 @@ async function loop() {
   const v = $('video'), c = $('overlay');
   if (v.readyState >= 2 && v.videoWidth) {
     if (c.width !== v.videoWidth) { c.width = v.videoWidth; c.height = v.videoHeight; }
+    if (!qrBusy && Date.now() - lastQR > 350) { lastQR = Date.now(); qrBusy = true; scanQR(v).then(s => { if (s) onQR(s); }).catch(() => {}).finally(() => { qrBusy = false; }); }
     try {
       const dets = await faceapi.detectAllFaces(v, new faceapi.TinyFaceDetectorOptions({ inputSize: 288, scoreThreshold: 0.5 })).withFaceLandmarks().withFaceDescriptors();
       const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height);
@@ -661,8 +662,38 @@ function afterUnlock() {
   rebuildPeople(); rebuildMatcher(); renderMini(); renderSync(); pull();
   if (ready) autoStart();
 }
+// ---------- خوێندنەوەی بارکۆد (QR) ی باجەکان ----------
+let qrDet = null, qrBusy = false, lastQR = 0;
+const qrCanvas = document.createElement('canvas');
+async function initQR() {
+  if ('BarcodeDetector' in window) {
+    try { const f = await BarcodeDetector.getSupportedFormats(); if (f.includes('qr_code')) { qrDet = new BarcodeDetector({ formats: ['qr_code'] }); return; } } catch {}
+  }
+  for (const u of ['https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js', 'https://unpkg.com/jsqr@1.4.0/dist/jsQR.js']) {
+    if (typeof jsQR === 'function') break; await loadScript(u, 20000);
+  }
+}
+async function scanQR(v) {
+  if (qrDet) { const r = await qrDet.detect(v); return r.length ? r[0].rawValue : null; }
+  if (typeof jsQR !== 'function') return null;
+  const s = Math.min(1, 640 / v.videoWidth); qrCanvas.width = Math.round(v.videoWidth * s); qrCanvas.height = Math.round(v.videoHeight * s);
+  const x = qrCanvas.getContext('2d', { willReadFrequently: true }); x.drawImage(v, 0, 0, qrCanvas.width, qrCanvas.height);
+  const r = jsQR(x.getImageData(0, 0, qrCanvas.width, qrCanvas.height).data, qrCanvas.width, qrCanvas.height, { inversionAttempts: 'dontInvert' });
+  return r ? r.data : null;
+}
+function onQR(s) {
+  const mm = /^K13-(\d{1,4})$/.exec(String(s).trim()); if (!mm) return;
+  const mem = bundle && bundle.members[+mm[1] - 1];
+  const now = Date.now();
+  if (!mem || !people[mem.k]) { if (now - lastUnknown > 3000) { lastUnknown = now; badSound(); banner('❌ بارکۆدەکە نەناسرایەوە', 'bad'); } return; }
+  const k = mem.k; if (now - (lastSeen[k] || 0) < 5000) return; lastSeen[k] = now;
+  const g = (people[k] || {}).g || '';
+  if (mark(k, true)) { okSound(); banner('✅ بەخێربێیت ' + k + (g ? '\n' + g : '') + '\n(بە بارکۆد)', 'ok'); }
+  else { againSound(); banner('✔ پێشتر تۆمارکراوە: ' + k, 'info'); }
+}
 const facePromise = loadFace().then(() => { rebuildMatcher(); status(`✓ ئامادەیە — ${Object.keys(people).length} ئەندام`); if (bundle) autoStart(); })
   .catch(e => status('❌ ' + e.message));
+initQR();
 if (load('pw_v13', null)) {
   await refreshBundle();
   if (bundle) afterUnlock(); else $('lock').classList.remove('hide');
