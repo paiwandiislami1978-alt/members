@@ -29,6 +29,8 @@ td.n{text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}
 .bar{height:10px;background:#0b1118;border-radius:6px;overflow:hidden;min-width:80px}.bar i{display:block;height:100%;background:var(--ok)}
 tr.g{cursor:pointer}tr.g:hover{background:#1d2b39}
 .rem{font-size:14px;color:var(--muted);padding:4px 10px 12px}
+.reml{margin:6px 0 0;padding-inline-start:2.2em;columns:3 220px;column-gap:24px;color:var(--ink);font-size:15px}
+.reml li{padding:3px 0;break-inside:avoid;border-bottom:1px dashed var(--line)}
 .feed{list-style:none;margin:0;padding:0;max-height:52vh;overflow:auto}
 .feed li{display:flex;justify-content:space-between;gap:8px;padding:8px 4px;border-bottom:1px solid var(--line)}
 .feed li small{color:var(--muted);display:block}
@@ -201,7 +203,7 @@ function render() {
   $('groups').innerHTML = Object.keys(G).sort((a, b) => a.localeCompare(b)).map(g => {
     const x = G[g], w = Math.round(x.inn * 100 / x.all);
     return `<tr class="g" data-g="${esc(g)}"><td>${open[g] ? '▾' : '▸'} ${esc(g)}</td><td style="width:30%"><div class="bar"><i style="width:${w}%"></i></div></td><td class="n">${x.inn} / ${x.all}</td></tr>` +
-      (open[g] ? `<tr><td colspan="3" class="rem">${x.rem.length ? '⏳ ماون: ' + x.rem.map(esc).join('، ') : '✅ هەموو ئامادەن'}</td></tr>` : '');
+      (open[g] ? `<tr><td colspan="3" class="rem">${x.rem.length ? '⏳ ماون (' + x.rem.length + '):<ol class="reml">' + x.rem.sort((a, b) => a.localeCompare(b)).map(k => '<li>' + esc(k) + '</li>').join('') + '</ol>' : '✅ هەموو ئامادەن'}</td></tr>` : '');
   }).join('');
   const byK = Object.fromEntries(S.people.map(p => [p.k, p.g]));
   const recent = Object.entries(att).sort((a, b) => (b[1].t || '').localeCompare(a[1].t || ''));
