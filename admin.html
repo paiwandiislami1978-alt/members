@@ -48,6 +48,22 @@ tr.g{cursor:pointer}tr.g:hover{background:#1d2b39}
 #lock .card{max-width:420px;width:100%;text-align:center}
 #lock input{width:100%;font:inherit;font-size:18px;padding:10px;border-radius:10px;border:1px solid #2a3a4a;background:#0b1118;color:var(--ink);direction:ltr;text-align:center;margin:12px 0}
 #lock button{width:100%;background:var(--acc);color:#04131d}
+#printArea{display:none}
+@media print{
+  @page{size:A4;margin:9mm}
+  body{background:#fff!important;color:#000!important}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important}
+  .pp{page-break-after:always;break-after:page;font-size:12.5pt}
+  .pp:last-child{page-break-after:auto;break-after:auto}
+  .pp h2{margin:0;font-size:15pt;display:flex;justify-content:space-between;border-bottom:2px solid #000;padding-bottom:2mm;margin-bottom:2mm}
+  .pp h2 small{font-size:10pt;font-weight:400}
+  .pp table{width:100%;border-collapse:collapse;table-layout:fixed}
+  .pp td,.pp th{border:1px solid #555;padding:0 2mm;height:16.6mm;vertical-align:middle;color:#000}
+  .pp th{height:7mm;background:#eee;font-size:10.5pt}
+  .pp img,.pp .ph{width:14mm;height:14mm;object-fit:cover;border-radius:2mm;display:block;margin:auto;background:#ddd}
+  .pp .c{text-align:center}
+}
 .hide{display:none!important}
 #sync{font-size:14px}
 </style>
@@ -69,6 +85,7 @@ tr.g{cursor:pointer}tr.g:hover{background:#1d2b39}
   <button id="csv">⬇ Excel</button>
   <button id="reset" style="background:#7a1f1f;color:#fff">🗑 سڕینەوەی هەموو ئامادەبووان</button>
   <button id="fs">⛶ پڕ بە شاشە</button>
+  <button id="print" style="background:#facc15;color:#111">🖨 چاپ / PDF</button>
 </header>
 <main>
   <section>
@@ -103,6 +120,7 @@ tr.g{cursor:pointer}tr.g:hover{background:#1d2b39}
     </div>
   </aside>
 </main>
+<div id="printArea"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
 (async () => {
@@ -214,6 +232,23 @@ $('reset').onclick = async () => {
   if (S.api) { try { await fetch(S.api, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ t: S.token, action: 'reset' }) }); } catch (e) { alert('❌ پەیوەندی نییە، دووبارە هەوڵ بدەرەوە'); return; } }
   att = {}; render(); setTimeout(pull, 1500);
   alert('✅ سڕایەوە. لیستەکە ئێستا بەتاڵە.');
+};
+$('print').onclick = () => {
+  const order = Object.fromEntries(S.people.map((p, i) => [p.k, p.g]));
+  const rows = Object.entries(att).filter(([k]) => k in order)
+    .sort((a, b) => (order[a[0]] || '').localeCompare(order[b[0]] || '') || (a[1].t || '').localeCompare(b[1].t || ''));
+  if (!rows.length) { alert('هێشتا کەس ئامادە نەبووە.'); return; }
+  const per = 15, pages = Math.ceil(rows.length / per), day = new Date().toLocaleDateString('en-GB');
+  let h = '';
+  for (let p = 0; p < pages; p++) {
+    h += `<section class="pp"><h2><span>لیستی ئامادەبووانی کۆنگرەی 13</span><small>${day} — کۆی ئامادەبووان: ${rows.length} — پەڕەی ${p + 1} / ${pages}</small></h2><table><colgroup><col style="width:10mm"><col style="width:19mm"><col><col style="width:62mm"><col style="width:17mm"></colgroup><tr><th>ژ</th><th>وێنە</th><th>ناو</th><th>مەڵبەند / ئۆرگان</th><th>کات</th></tr>`;
+    rows.slice(p * per, p * per + per).forEach(([k, v], i) => {
+      h += `<tr><td class="c">${p * per + i + 1}</td><td>${photos[k] ? `<img src="${photos[k]}" alt="">` : '<span class="ph"></span>'}</td><td><b>${esc(k)}</b></td><td>${esc(order[k] || '')}</td><td class="c">${esc((v.t || '').slice(11, 16))}</td></tr>`;
+    });
+    h += '</table></section>';
+  }
+  $('printArea').innerHTML = h;
+  setTimeout(() => window.print(), 600);
 };
 $('fs').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); };
 $('csv').onclick = () => {
