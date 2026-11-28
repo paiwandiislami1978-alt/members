@@ -54,6 +54,7 @@ input[type=range]{width:200px;padding:0}
 .grp h3{font-size:16px;margin:0;padding:8px 10px;background:#0b1118;border-radius:10px;display:flex;justify-content:space-between;gap:8px;position:sticky;top:64px}
 ul.list{list-style:none;padding:0;margin:0}
 ul.list li{display:flex;justify-content:space-between;align-items:center;padding:7px 6px;border-bottom:1px solid var(--line);gap:8px}
+ul.list li .num{display:inline-block;min-width:2.2em;color:var(--acc)}
 ul.list li button{min-height:34px;padding:2px 12px;font-size:14px}
 .time{direction:ltr;color:var(--muted);font-size:13px;white-space:nowrap}
 #lock{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -407,11 +408,11 @@ function renderAtt() {
   }
   const html = Object.keys(byG).sort((a, b) => a.localeCompare(b)).map(gr => {
     const x = byG[gr]; if (!x.rows.length) return '';
-    x.rows.sort(seg === 'in' ? (a, b) => (att[b].t || '').localeCompare(att[a].t || '') : (a, b) => a.localeCompare(b));
+    x.rows.sort(seg === 'in' ? (a, b) => (att[a].t || '').localeCompare(att[b].t || '') : (a, b) => a.localeCompare(b));
     return `<div class="grp"><h3><span>${esc(gr)}</span><span class="muted">${x.inn} / ${x.all} ئامادە</span></h3><ul class="list">` +
-      x.rows.map(k => seg === 'in'
-        ? `<li><span>${esc(k)}</span><span class="row" style="gap:6px"><span class="time">${esc((att[k].t || '').slice(11, 16))}</span><button class="ghost" data-un="${esc(k)}">↩</button></span></li>`
-        : `<li><span>${esc(k)}${people[k].has ? '' : ' <span class="muted">(بێ وێنە)</span>'}</span><button class="okb" data-mk="${esc(k)}">✓ ئامادە</button></li>`
+      x.rows.map((k, i) => seg === 'in'
+        ? `<li><span><b class="num">${i + 1}.</b> ${esc(k)}</span><span class="row" style="gap:6px"><span class="time">${esc((att[k].t || '').slice(11, 16))}</span><button class="ghost" data-un="${esc(k)}">↩</button></span></li>`
+        : `<li><span><b class="num">${i + 1}.</b> ${esc(k)}${people[k].has ? '' : ' <span class="muted">(بێ وێنە)</span>'}</span><button class="okb" data-mk="${esc(k)}">✓ ئامادە</button></li>`
       ).join('') + '</ul></div>';
   }).join('');
   $('lists').innerHTML = html || `<p class="muted" style="text-align:center">${seg === 'in' ? 'هێشتا کەس نەهاتووە.' : 'هەموو ئامادەن 🎉'}</p>`;
